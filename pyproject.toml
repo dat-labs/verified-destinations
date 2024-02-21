@@ -10,6 +10,7 @@ dependencies = [
   # TODO
   "pinecone-client==2.2.4",
   "qdrant-client==1.7.3",
+  "dat-core@git+ssh://git@github.com/riju-dc/dat-core@feature/base-classes",
 ]
 
 [build-system]

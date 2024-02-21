@@ -2,8 +2,8 @@ import uuid
 import itertools
 import pinecone
 from typing import Any, List, Optional, Tuple, Iterator, Iterable, Dict
-from connectors.destinations.vector_db_helpers.seeder import Seeder
-from connectors.destinations.vector_db_helpers.utils import create_chunks
+from dat_core.connectors.destinations.vector_db_helpers.seeder import Seeder
+from dat_core.connectors.destinations.vector_db_helpers.utils import create_chunks
 from dat_core.pydantic_models.dat_message import DatDocumentMessage
 from dat_core.pydantic_models.stream_metadata import StreamMetadata
 
