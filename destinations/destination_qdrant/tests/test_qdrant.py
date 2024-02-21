@@ -1,14 +1,14 @@
 import yaml
 from typing import List
-from pydantic_models.connector_specification import ConnectorSpecification
-from pydantic_models.dat_connection_status import Status
+from dat_core.pydantic_models.connector_specification import ConnectorSpecification
+from dat_core.pydantic_models.dat_connection_status import Status
 from conftest import *
 from connectors.destinations.destination_qdrant.destination_qdrant import Qdrant
-from pydantic_models.dat_message import (DatMessage, DatDocumentMessage,
+from dat_core.pydantic_models.dat_message import (DatMessage, DatDocumentMessage,
                                          Data, DatStateMessage, StreamState,
                                          StreamStatus, DatDocumentStream,
                                          Type)
-from pydantic_models.dat_catalog import DatCatalog
+from dat_core.pydantic_models.dat_catalog import DatCatalog
 
 
 class TestQdrant:

@@ -1,9 +1,9 @@
 from typing import Any, Tuple, Iterable, Mapping
 import os
 import mysql.connector
-from connectors.destinations.destination import Destination
-from pydantic_models.connector_specification import ConnectorSpecification
-from pydantic_models.dat_message import DatMessage
+from dat_core.connectors.destinations.destination import Destination
+from dat_core.pydantic_models.connector_specification import ConnectorSpecification
+from dat_core.pydantic_models.dat_message import DatMessage
 
 
 class DestinationMysql(Destination):

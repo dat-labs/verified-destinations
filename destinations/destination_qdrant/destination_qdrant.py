@@ -1,12 +1,12 @@
 import os
 from typing import Any, Tuple, Optional, Mapping, Iterable
 from connectors.destinations.destination import Destination
-from pydantic_models.connector_specification import ConnectorSpecification
+from dat_core.pydantic_models.connector_specification import ConnectorSpecification
 from connectors.destinations.destination_qdrant.seeder import QdrantSeeder
 from connectors.destinations.vector_db_helpers.data_processor import DataProcessor
-from pydantic_models.dat_catalog import DatCatalog
-from pydantic_models.dat_message import DatMessage, Type, DatDocumentMessage, Data
-from pydantic_models.dat_document_stream import SyncMode, DatDocumentStream
+from dat_core.pydantic_models.dat_catalog import DatCatalog
+from dat_core.pydantic_models.dat_message import DatMessage, Type, DatDocumentMessage, Data
+from dat_core.pydantic_models.dat_document_stream import SyncMode, DatDocumentStream
 
 
 BATCH_SIZE = 1000

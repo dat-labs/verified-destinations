@@ -4,8 +4,8 @@ import pinecone
 from typing import Any, List, Optional, Tuple, Iterator, Iterable, Dict
 from connectors.destinations.vector_db_helpers.seeder import Seeder
 from connectors.destinations.vector_db_helpers.utils import create_chunks
-from pydantic_models.dat_message import DatDocumentMessage
-from pydantic_models.stream_metadata import StreamMetadata
+from dat_core.pydantic_models.dat_message import DatDocumentMessage
+from dat_core.pydantic_models.stream_metadata import StreamMetadata
 
 PINECONE_BATCH_SIZE = 40
 

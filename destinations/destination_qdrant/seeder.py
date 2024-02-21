@@ -3,8 +3,8 @@ from qdrant_client import QdrantClient, models
 from typing import Any, List, Optional, Dict
 from connectors.destinations.vector_db_helpers.seeder import Seeder
 from qdrant_openapi_client.models import VectorParams, Distance
-from pydantic_models.dat_message import DatDocumentMessage
-from pydantic_models.stream_metadata import StreamMetadata
+from dat_core.pydantic_models.dat_message import DatDocumentMessage
+from dat_core.pydantic_models.stream_metadata import StreamMetadata
 
 
 DISTANCE_MAP = {

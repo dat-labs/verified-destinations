@@ -1,12 +1,12 @@
 import os
 from connectors.destinations.destination import Destination
 from typing import Any, Iterable, Mapping, Tuple, Optional
-from pydantic_models.connector_specification import ConnectorSpecification, DestinationSyncMode
-from pydantic_models.dat_catalog import DatCatalog
-from pydantic_models.dat_message import DatMessage, Type, DatDocumentMessage, Data
+from dat_core.pydantic_models.connector_specification import ConnectorSpecification, DestinationSyncMode
+from dat_core.pydantic_models.dat_catalog import DatCatalog
+from dat_core.pydantic_models.dat_message import DatMessage, Type, DatDocumentMessage, Data
 from connectors.destinations.destination_pinecone.seeder import PineconeSeeder
 from connectors.destinations.vector_db_helpers.data_processor import DataProcessor
-from pydantic_models.dat_document_stream import DatDocumentStream, SyncMode
+from dat_core.pydantic_models.dat_document_stream import DatDocumentStream, SyncMode
 
 
 
