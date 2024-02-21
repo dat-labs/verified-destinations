@@ -1,0 +1,21 @@
+[project]
+name = "verified-destinations"
+version = "0.1.0"
+description = "Will host destinations for the dat project"
+license = {text = "MIT License"}
+dependencies = [
+  "pytest",
+  "pydantic",
+  "PyYAML",
+  # TODO
+  "pinecone-client==2.2.4",
+  "qdrant-client==1.7.3",
+]
+
+[build-system]
+requires = [
+    "setuptools", "wheel",
+]
+
+# [tool.setuptools.packages.find]
+# exclude = ["Executables*", "Orchestrator*", ] 
