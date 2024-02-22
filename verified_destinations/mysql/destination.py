@@ -6,7 +6,7 @@ from dat_core.pydantic_models.connector_specification import ConnectorSpecificat
 from dat_core.pydantic_models.dat_message import DatMessage
 
 
-class DestinationMysql(Destination):
+class Mysql(Destination):
 
     _spec_file = os.path.join(os.path.dirname(
         os.path.abspath(__file__)), 'specs.yml')

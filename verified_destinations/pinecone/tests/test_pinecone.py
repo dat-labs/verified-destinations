@@ -3,7 +3,7 @@ import yaml
 from typing import List
 from dat_core.pydantic_models.connector_specification import ConnectorSpecification
 from dat_core.pydantic_models.dat_connection_status import Status
-from verified_destinations.destination_pinecone.destination_pinecone import Pinecone
+from verified_destinations.pinecone.destination import Pinecone
 from conftest import *
 from dat_core.pydantic_models.dat_message import (DatMessage, DatDocumentMessage,
                                          Data, DatStateMessage,
@@ -20,7 +20,7 @@ class TestPinecone:
         THEN spec stated in ./specs/ConnectorSpecification.yml is returned
         """
         spec = Pinecone().spec()
-        with open('./verified_destinations/destination_pinecone/specs.yml') as yaml_in:
+        with open('./verified_destinations/pinecone/specs.yml') as yaml_in:
             schema = yaml.safe_load(yaml_in)
             assert schema == spec
 
@@ -30,7 +30,7 @@ class TestPinecone:
         WHEN check() is called on a valid Destination class
         THEN no error is raised
         """
-        destination_config_file = "./verified_destinations/destination_pinecone/destination_config.json"
+        destination_config_file = "./verified_destinations/pinecone/destination_config.json"
         config = ConnectorSpecification.model_validate_json(
             open(destination_config_file).read(), )
         check = Pinecone().check(
@@ -44,11 +44,11 @@ class TestPinecone:
         WHEN write() is called on a valid Destination class
         THEN no error is raised
         """
-        destination_config_file = "./verified_destinations/destination_pinecone/destination_config.json"
+        destination_config_file = "./verified_destinations/pinecone/destination_config.json"
         config = ConnectorSpecification.model_validate_json(
             open(destination_config_file).read(), )
         configured_catalog = DatCatalog.model_validate_json(
-            open('./verified_destinations/destination_pinecone/configured_catalog.json').read(), )
+            open('./verified_destinations/pinecone/configured_catalog.json').read(), )
         first_record = DatMessage(
                 type=Type.RECORD,
                 record=DatDocumentMessage(
@@ -104,11 +104,11 @@ class TestPinecone:
         WHEN write() is called on a valid Destination class
         THEN no error is raised
         """
-        destination_config_file = "./verified_destinations/destination_pinecone/destination_config.json"
+        destination_config_file = "./verified_destinations/pinecone/destination_config.json"
         config = ConnectorSpecification.model_validate_json(
             open(destination_config_file).read(), )
         configured_catalog = DatCatalog.model_validate_json(
-            open('./verified_destinations/destination_pinecone/configured_catalog.json').read(), )
+            open('./verified_destinations/pinecone/configured_catalog.json').read(), )
         first_record = DatMessage(
                 type=Type.RECORD,
                 record=DatDocumentMessage(

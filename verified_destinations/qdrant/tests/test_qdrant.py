@@ -3,7 +3,7 @@ from typing import List
 from dat_core.pydantic_models.connector_specification import ConnectorSpecification
 from dat_core.pydantic_models.dat_connection_status import Status
 from conftest import *
-from connectors.destinations.destination_qdrant.destination_qdrant import Qdrant
+from verified_destinations.qdrant.destination import Qdrant
 from dat_core.pydantic_models.dat_message import (DatMessage, DatDocumentMessage,
                                          Data, DatStateMessage, StreamState,
                                          StreamStatus, DatDocumentStream,
@@ -13,7 +13,7 @@ from dat_core.pydantic_models.dat_catalog import DatCatalog
 
 class TestQdrant:
 
-    DESTINATION_CONFIG_FILE = "./verified_destinations/destination_qdrant/destination_config.json"
+    DESTINATION_CONFIG_FILE = "./verified_destinations/qdrant/destination_config.json"
 
     def test_spec(self, ):
         """
@@ -22,7 +22,7 @@ class TestQdrant:
         THEN spec stated in ./specs/ConnectorSpecification.yml is returned
         """
         spec = Qdrant().spec()
-        with open('./verified_destinations/destination_qdrant/specs.yml') as yaml_in:
+        with open('./verified_destinations/qdrant/specs.yml') as yaml_in:
             schema = yaml.safe_load(yaml_in)
             assert schema == spec
 
@@ -48,7 +48,7 @@ class TestQdrant:
         config = ConnectorSpecification.model_validate_json(
             open(self.DESTINATION_CONFIG_FILE).read(), )
         configured_catalog = DatCatalog.model_validate_json(
-            open('./verified_destinations/destination_qdrant/configured_catalog.json').read(), )
+            open('./verified_destinations/qdrant/configured_catalog.json').read(), )
         first_record = DatMessage(
                 type=Type.RECORD,
                 record=DatDocumentMessage(
@@ -112,7 +112,7 @@ class TestQdrant:
         config = ConnectorSpecification.model_validate_json(
             open(self.DESTINATION_CONFIG_FILE).read(), )
         configured_catalog = DatCatalog.model_validate_json(
-            open('./verified_destinations/destination_qdrant/configured_catalog.json').read(), )
+            open('./verified_destinations/qdrant/configured_catalog.json').read(), )
         first_record = DatMessage(
                 type=Type.RECORD,
                 record=DatDocumentMessage(
