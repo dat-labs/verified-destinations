@@ -1,22 +1,32 @@
-[project]
+[tool.poetry]
 name = "verified-destinations"
 version = "0.1.0"
-description = "Will host destinations for the dat project"
-license = {text = "MIT License"}
-dependencies = [
-  "pytest",
-  "pydantic",
-  "PyYAML",
-  # TODO
-  "pinecone-client==2.2.4",
-  "qdrant-client==1.7.3",
-  "dat-core@git+ssh://git@github.com/riju-dc/dat-core@feature/base-classes",
-]
+description = "Package to house dat verified destinations"
+authors = ["datLabs <team@datlabs.com>"]
+license = "MIT"
+readme = "README.md"
+
+
+[tool.poetry.dependencies]
+python = "^3.10"
+dat-core = { git = "ssh://git@github.com/riju-dc/dat-core", branch = "feature/base-classes" }
+
+
+[tool.poetry.group.dev.dependencies]
+pydantic = "^2.6.3"
+pyyaml = "^6.0.1"
+mypy = "^1.8.0"
+
+
+[tool.poetry.group.test.dependencies]
+pytest = "^8.0.2"
+
+
+[tool.poetry.group.vector_databases.dependencies]
+pinecone-client = "^3.1.0"
+qdrant-client = "^1.8.0"
+
 
 [build-system]
-requires = [
-    "setuptools", "wheel",
-]
-
-# [tool.setuptools.packages.find]
-# exclude = ["Executables*", "Orchestrator*", ] 
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
