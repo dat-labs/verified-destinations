@@ -1,6 +1,6 @@
 import uuid
-import itertools
-import pinecone
+from pinecone import Pinecone
+from pinecone.core.client.exceptions import NotFoundException
 from typing import Any, List, Optional, Tuple, Iterator, Iterable, Dict
 from dat_core.connectors.destinations.vector_db_helpers.seeder import Seeder
 from dat_core.connectors.destinations.vector_db_helpers.utils import create_chunks
@@ -18,8 +18,8 @@ MAX_IDS_PER_DELETE = 1000
 class PineconeSeeder(Seeder):
     def __init__(self, config: Any, embedding_dimensions: int):
         super().__init__(config)
-        pinecone.init(api_key=config.connectionSpecification.get('pinecone_api_key'), environment=config.connectionSpecification.get('pinecone_environment'))
-        self.pinecone_index = pinecone.Index(config.connectionSpecification.get('pinecone_index'))
+        self.pine = Pinecone(api_key=config.connectionSpecification.get('pinecone_api_key'))
+        self.pinecone_index = self.pine.Index(config.connectionSpecification.get('pinecone_index'))
         self.embedding_dimensions = embedding_dimensions
 
     def seed(self, document_chunks: List[DatDocumentMessage], namespace: str, stream: str) -> None:
@@ -39,7 +39,7 @@ class PineconeSeeder(Seeder):
 
     def delete(self, filter, namespace=None):
         meta_filter = self.metadata_filter(filter)
-        _pod_type = pinecone.describe_index(self.config.connectionSpecification.get('pinecone_index')).pod_type
+        _pod_type = self.pine.describe_index(self.config.connectionSpecification.get('pinecone_index')).spec.pod.pod_type
         if _pod_type == "starter":
             # Starter pod types have a maximum of 100000 rows
             top_k = 10000
@@ -63,11 +63,11 @@ class PineconeSeeder(Seeder):
 
     def check(self) -> Optional[str]:
         try:
-            indexes = pinecone.list_indexes()
+            indexes = self.pine.list_indexes()
             index = self.config.connectionSpecification.get('pinecone_index')
-            if index not in indexes:
+            if index not in [i.name for i in indexes]:
                 return False, f"Index {index} does not exist in environment {self.config.connectionSpecification.get('pinecone_environment')}."
-            description = pinecone.describe_index(index)
+            description = self.pine.describe_index(index)
             if description.dimension != self.embedding_dimensions:
                 return (False,
                         (f"Index {index} has dimension {description.dimension} "
@@ -75,6 +75,12 @@ class PineconeSeeder(Seeder):
         except Exception as e:
             raise e
         return True, description
+
+    def dest_sync(self, namespace: str) -> None:
+        try:
+            self.pinecone_index.delete(delete_all=True, namespace=namespace)
+        except NotFoundException:
+            pass
 
     def metadata_filter(self, metadata: StreamMetadata) -> Any:
         meta_filter = {}

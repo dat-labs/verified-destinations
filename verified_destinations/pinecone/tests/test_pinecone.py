@@ -1,15 +1,14 @@
-import io
 import yaml
+import os
 from typing import List
 from dat_core.pydantic_models.connector_specification import ConnectorSpecification
 from dat_core.pydantic_models.dat_connection_status import Status
 from verified_destinations.pinecone.destination import Pinecone
-from conftest import *
 from dat_core.pydantic_models.dat_message import (DatMessage, DatDocumentMessage,
                                          Data, DatStateMessage,
                                          StreamState, StreamStatus,
                                          DatDocumentStream, Type)
-from dat_core.pydantic_models.dat_catalog import DatCatalog
+from dat_core.pydantic_models.configured_dat_catalog import ConfiguredDatCatalog
 
 class TestPinecone:
 
@@ -20,35 +19,30 @@ class TestPinecone:
         THEN spec stated in ./specs/ConnectorSpecification.yml is returned
         """
         spec = Pinecone().spec()
-        with open('./verified_destinations/pinecone/specs.yml') as yaml_in:
+        current_dir = os.path.dirname(os.path.abspath(__file__))   
+        yaml_path = os.path.join(current_dir, "..", "specs.yml")
+        with open(yaml_path) as yaml_in:
             schema = yaml.safe_load(yaml_in)
             assert schema == spec
 
-    def test_check(self, ):
+    def test_check(self, config):
         """
         GIVEN a valid connectionSpecification JSON config
         WHEN check() is called on a valid Destination class
         THEN no error is raised
         """
-        destination_config_file = "./verified_destinations/pinecone/destination_config.json"
-        config = ConnectorSpecification.model_validate_json(
-            open(destination_config_file).read(), )
         check = Pinecone().check(
             config=config)
         print(check)
         assert check.status == Status.SUCCEEDED
 
-    def test_write(self, ):
+    def test_write(self, config, conf_catalog):
         """
         GIVEN a valid connectionSpecification JSON config
         WHEN write() is called on a valid Destination class
         THEN no error is raised
         """
-        destination_config_file = "./verified_destinations/pinecone/destination_config.json"
-        config = ConnectorSpecification.model_validate_json(
-            open(destination_config_file).read(), )
-        configured_catalog = DatCatalog.model_validate_json(
-            open('./verified_destinations/pinecone/configured_catalog.json').read(), )
+        configured_catalog = ConfiguredDatCatalog.model_validate_json(conf_catalog.json())
         first_record = DatMessage(
                 type=Type.RECORD,
                 record=DatDocumentMessage(
@@ -59,10 +53,10 @@ class TestPinecone:
                                   "dat_stream": "PDF", "dat_document_entity": "DBT/DBT Overview.pdf"},
                     ),
                     emitted_at=1,
-                    namespace="pytest_seeder",
+                    namespace=configured_catalog.document_streams[0].namespace,
                     stream=DatDocumentStream(
-                        name="S3",
-                        namespace="pytest_seeder",
+                        name=configured_catalog.document_streams[0].stream.name,
+                        namespace=configured_catalog.document_streams[0].namespace,
                         sync_mode="incremental",
                     ),
                 ),
@@ -74,13 +68,13 @@ class TestPinecone:
                         document_chunk='bar',
                         vectors=[1.0] * 1536,
                         metadata={"meta": "Arbitrary", "dat_source": "S3",
-                                  "dat_stream": "PDF", "dat_document_entity": "Apple/DBT/DBT Overview.pdf"},
+                                  "dat_stream": "CSV", "dat_document_entity": "Apple/DBT/DBT Overview.pdf"},
                     ),
                     emitted_at=2,
-                    namespace="pytest_seeder",
+                    namespace=configured_catalog.document_streams[1].namespace,
                     stream=DatDocumentStream(
-                        name="S3",
-                        namespace="pytest_seeder",
+                        name=configured_catalog.document_streams[1].stream.name,
+                        namespace=configured_catalog.document_streams[1].namespace,
                         sync_mode="incremental",
                     )
                 ),
@@ -98,61 +92,59 @@ class TestPinecone:
             print(f"doc: {doc}")
             assert isinstance(doc, DatMessage)
 
-    def test_write_state_started(self, ):
+    def test_write_multiple_streams(self, config, conf_catalog):
         """
         GIVEN a valid connectionSpecification JSON config
         WHEN write() is called on a valid Destination class
         THEN no error is raised
         """
-        destination_config_file = "./verified_destinations/pinecone/destination_config.json"
-        config = ConnectorSpecification.model_validate_json(
-            open(destination_config_file).read(), )
-        configured_catalog = DatCatalog.model_validate_json(
-            open('./verified_destinations/pinecone/configured_catalog.json').read(), )
+        comp_state_msgs = []
+        configured_catalog = ConfiguredDatCatalog.model_validate_json(
+            conf_catalog.json())
         first_record = DatMessage(
-                type=Type.RECORD,
-                record=DatDocumentMessage(
-                    data=Data(
-                        document_chunk='foo',
-                        vectors=[1.0] * 1536,
-                        metadata={"meta": "Objective", "dat_source": "S3",
-                                  "dat_stream": "PDF", "dat_document_entity": "DBT/DBT Overview.pdf"},
-                    ),
-                    emitted_at=1,
-                    namespace="pytest_seeder",
-                    stream=DatDocumentStream(
-                        name="S3",
-                        namespace="pytest_seeder",
-                        sync_mode="incremental",
-                    ),
+            type=Type.RECORD,
+            record=DatDocumentMessage(
+                data=Data(
+                    document_chunk='foo',
+                    vectors=[1.0] * 1536,
+                    metadata={"meta": "Objective", "dat_source": "S3",
+                                "dat_stream": "PDF", "dat_document_entity": "DBT/DBT Overview.pdf"},
                 ),
-            )
+                emitted_at=1,
+                namespace=configured_catalog.document_streams[0].namespace,
+                stream=DatDocumentStream(
+                    name=configured_catalog.document_streams[0].stream.name,
+                    namespace=configured_catalog.document_streams[0].namespace,
+                    sync_mode="incremental",
+                ),
+            ),
+        )
         second_record = DatMessage(
-                type=Type.RECORD,
-                record=DatDocumentMessage(
-                    data=Data(
-                        document_chunk='bar',
-                        vectors=[1.1] * 1536,
-                        metadata={"meta": "Arbitrary", "dat_source": "S3",
-                                  "dat_stream": "PDF", "dat_document_entity": "Apple/DBT/DBT Overview.pdf"},
-                    ),
-                    emitted_at=2,
-                    namespace="pytest_seeder",
-                    stream=DatDocumentStream(
-                        name="GCS",
-                        namespace="pytest_seeder",
-                        sync_mode="incremental",
-                    )
+            type=Type.RECORD,
+            record=DatDocumentMessage(
+                data=Data(
+                    document_chunk='bar',
+                    vectors=[1.1] * 1536,
+                    metadata={"meta": "Arbitrary", "dat_source": "S3",
+                                "dat_stream": "CSV", "dat_document_entity": "Apple/DBT/DBT Overview.pdf"},
                 ),
-            )
+                emitted_at=2,
+                namespace=configured_catalog.document_streams[1].namespace,
+                stream=DatDocumentStream(
+                    name=configured_catalog.document_streams[1].stream.name,
+                    namespace=configured_catalog.document_streams[1].namespace,
+                    sync_mode="incremental",
+                )
+            ),
+        )
         mocked_input: List[DatMessage] = [
             DatMessage(
                 type=Type.STATE,
                 state=DatStateMessage(
                     stream=DatDocumentStream(
-                        name="S3",
-                        namespace="pytest_seeder",
-                        sync_mode="incremental",
+                        name=configured_catalog.document_streams[0].stream.name,
+                        namespace=configured_catalog.document_streams[0].namespace,
+                        sync_mode="incremental"
                     ),
                     stream_state=StreamState(
                         data={},
@@ -166,8 +158,8 @@ class TestPinecone:
                 type=Type.STATE,
                 state=DatStateMessage(
                     stream=DatDocumentStream(
-                        name="GCS",
-                        namespace="pytest_seeder",
+                        name=configured_catalog.document_streams[1].stream.name,
+                        namespace=configured_catalog.document_streams[1].namespace,
                         sync_mode="incremental",
                     ),
                     stream_state=StreamState(
@@ -182,8 +174,22 @@ class TestPinecone:
                 type=Type.STATE,
                 state=DatStateMessage(
                     stream=DatDocumentStream(
-                        name="S3",
-                        namespace="pytest_seeder",
+                        name=configured_catalog.document_streams[0].stream.name,
+                        namespace=configured_catalog.document_streams[0].namespace,
+                        sync_mode="incremental",
+                    ),
+                    stream_state=StreamState(
+                        data={"last_emitted_at": 2},
+                        stream_status=StreamStatus.COMPLETED
+                    )
+                ),
+            ),
+            DatMessage(
+                type=Type.STATE,
+                state=DatStateMessage(
+                    stream=DatDocumentStream(
+                        name=configured_catalog.document_streams[1].stream.name,
+                        namespace=configured_catalog.document_streams[1].namespace,
                         sync_mode="incremental",
                     ),
                     stream_state=StreamState(
@@ -200,4 +206,9 @@ class TestPinecone:
         )
         for doc in docs:
             print(f"doc: {doc}")
+            if doc.state.stream_state.stream_status == StreamStatus.COMPLETED:
+                comp_state_msgs.append(doc)
             assert isinstance(doc, DatMessage)
+        assert len(comp_state_msgs) == 2
+        assert comp_state_msgs[0].state.stream_state.stream_status == StreamStatus.COMPLETED
+        assert comp_state_msgs[1].state.stream_state.stream_status == StreamStatus.COMPLETED
