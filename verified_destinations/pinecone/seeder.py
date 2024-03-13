@@ -1,7 +1,7 @@
 import uuid
 from pinecone import Pinecone
 from pinecone.core.client.exceptions import NotFoundException
-from typing import Any, List, Optional, Tuple, Iterator, Iterable, Dict
+from typing import Any, List, Optional
 from dat_core.connectors.destinations.vector_db_helpers.seeder import Seeder
 from dat_core.connectors.destinations.vector_db_helpers.utils import create_chunks
 from dat_core.pydantic_models.dat_message import DatDocumentMessage
