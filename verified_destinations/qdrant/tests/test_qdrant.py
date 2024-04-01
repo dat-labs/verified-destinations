@@ -63,7 +63,7 @@ class TestQdrant:
                     stream=DatDocumentStream(
                         name="S3",
                         namespace="pytest_seeder",
-                        sync_mode="incremental",
+                        read_sync_mode="incremental",
                     ),
                 ),
             )
@@ -81,7 +81,7 @@ class TestQdrant:
                     stream=DatDocumentStream(
                         name="S3",
                         namespace="pytest_seeder",
-                        sync_mode="incremental",
+                        read_sync_mode="incremental",
                     )
                 ),
             )
@@ -127,7 +127,7 @@ class TestQdrant:
                     stream=DatDocumentStream(
                         name="S3",
                         namespace="pytest_seeder",
-                        sync_mode="incremental",
+                        read_sync_mode="incremental",
                     ),
                 ),
             )
@@ -145,7 +145,7 @@ class TestQdrant:
                     stream=DatDocumentStream(
                         name="S3",
                         namespace="pytest_seeder",
-                        sync_mode="incremental",
+                        read_sync_mode="incremental",
                     )
                 ),
             )
@@ -156,7 +156,7 @@ class TestQdrant:
                     stream=DatDocumentStream(
                         name="S3",
                         namespace="pytest_seeder",
-                        sync_mode="incremental",
+                        read_sync_mode="incremental",
                     ),
                     stream_state=StreamState(
                         data={},
@@ -172,7 +172,7 @@ class TestQdrant:
                     stream=DatDocumentStream(
                         name="S3",
                         namespace="pytest_seeder",
-                        sync_mode="incremental",
+                        read_sync_mode="incremental",
                     ),
                     stream_state=StreamState(
                         data={},
@@ -188,7 +188,7 @@ class TestQdrant:
                     stream=DatDocumentStream(
                         name="S3",
                         namespace="pytest_seeder",
-                        sync_mode="incremental",
+                        read_sync_mode="incremental",
                     ),
                     stream_state=StreamState(
                         data={"last_emitted_at": 2},

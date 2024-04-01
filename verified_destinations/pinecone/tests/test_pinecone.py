@@ -57,7 +57,7 @@ class TestPinecone:
                     stream=DatDocumentStream(
                         name=configured_catalog.document_streams[0].stream.name,
                         namespace=configured_catalog.document_streams[0].namespace,
-                        sync_mode="incremental",
+                        read_sync_mode="incremental",
                     ),
                 ),
             )
@@ -75,7 +75,7 @@ class TestPinecone:
                     stream=DatDocumentStream(
                         name=configured_catalog.document_streams[1].stream.name,
                         namespace=configured_catalog.document_streams[1].namespace,
-                        sync_mode="incremental",
+                        read_sync_mode="incremental",
                     )
                 ),
             )
@@ -115,7 +115,7 @@ class TestPinecone:
                 stream=DatDocumentStream(
                     name=configured_catalog.document_streams[0].stream.name,
                     namespace=configured_catalog.document_streams[0].namespace,
-                    sync_mode="incremental",
+                    read_sync_mode="incremental",
                 ),
             ),
         )
@@ -133,7 +133,7 @@ class TestPinecone:
                 stream=DatDocumentStream(
                     name=configured_catalog.document_streams[1].stream.name,
                     namespace=configured_catalog.document_streams[1].namespace,
-                    sync_mode="incremental",
+                    read_sync_mode="incremental",
                 )
             ),
         )
@@ -144,7 +144,7 @@ class TestPinecone:
                     stream=DatDocumentStream(
                         name=configured_catalog.document_streams[0].stream.name,
                         namespace=configured_catalog.document_streams[0].namespace,
-                        sync_mode="incremental"
+                        read_sync_mode="incremental"
                     ),
                     stream_state=StreamState(
                         data={},
@@ -160,7 +160,7 @@ class TestPinecone:
                     stream=DatDocumentStream(
                         name=configured_catalog.document_streams[1].stream.name,
                         namespace=configured_catalog.document_streams[1].namespace,
-                        sync_mode="incremental",
+                        read_sync_mode="incremental",
                     ),
                     stream_state=StreamState(
                         data={},
@@ -176,7 +176,7 @@ class TestPinecone:
                     stream=DatDocumentStream(
                         name=configured_catalog.document_streams[0].stream.name,
                         namespace=configured_catalog.document_streams[0].namespace,
-                        sync_mode="incremental",
+                        read_sync_mode="incremental",
                     ),
                     stream_state=StreamState(
                         data={"last_emitted_at": 2},
@@ -190,7 +190,7 @@ class TestPinecone:
                     stream=DatDocumentStream(
                         name=configured_catalog.document_streams[1].stream.name,
                         namespace=configured_catalog.document_streams[1].namespace,
-                        sync_mode="incremental",
+                        read_sync_mode="incremental",
                     ),
                     stream_state=StreamState(
                         data={"last_emitted_at": 2},
