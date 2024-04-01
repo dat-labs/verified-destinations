@@ -8,7 +8,7 @@ from dat_core.pydantic_models.dat_message import (DatMessage, DatDocumentMessage
                                          Data, DatStateMessage,
                                          StreamState, StreamStatus,
                                          DatDocumentStream, Type)
-from dat_core.pydantic_models.configured_dat_catalog import ConfiguredDatCatalog
+from dat_core.pydantic_models import DatCatalog
 
 class TestPinecone:
 
@@ -42,7 +42,7 @@ class TestPinecone:
         WHEN write() is called on a valid Destination class
         THEN no error is raised
         """
-        configured_catalog = ConfiguredDatCatalog.model_validate_json(conf_catalog.json())
+        configured_catalog = DatCatalog.model_validate_json(conf_catalog.json())
         first_record = DatMessage(
                 type=Type.RECORD,
                 record=DatDocumentMessage(
@@ -99,7 +99,7 @@ class TestPinecone:
         THEN no error is raised
         """
         comp_state_msgs = []
-        configured_catalog = ConfiguredDatCatalog.model_validate_json(
+        configured_catalog = DatCatalog.model_validate_json(
             conf_catalog.json())
         first_record = DatMessage(
             type=Type.RECORD,

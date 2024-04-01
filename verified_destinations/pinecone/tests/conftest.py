@@ -1,8 +1,8 @@
 import os
 import pytest
 from dat_core.pydantic_models.connector_specification import ConnectorSpecification
-from dat_core.pydantic_models.configured_dat_catalog import ConfiguredDatCatalog
-from dat_core.pydantic_models.configured_document_stream import ConfiguredDocumentStream, DestinationSyncMode
+from dat_core.pydantic_models import DatCatalog, DatDocumentStream
+from dat_core.pydantic_models.configured_document_stream import DestinationSyncMode
 from dat_core.pydantic_models.dat_document_stream import DatDocumentStream, SyncMode
 
 
@@ -20,27 +20,19 @@ def config(request):
 
 @pytest.fixture(scope="class")
 def conf_catalog(request):
-    conf_catalog = ConfiguredDatCatalog(
+    conf_catalog = DatCatalog(
         document_streams=[
-            ConfiguredDocumentStream(
-                stream=DatDocumentStream(
-                    name="PDF",
-                    namespace="pytest_pdf",
-                    sync_mode=SyncMode.INCREMENTAL
-                ),
+            DatDocumentStream(
+                name="PDF",
                 namespace="pytest_pdf",
-                sync_mode=SyncMode.INCREMENTAL,
-                destination_sync_mode=DestinationSyncMode.UPSERT
+                read_sync_mode=SyncMode.INCREMENTAL,
+                write_sync_mode=DestinationSyncMode.UPSERT,
             ),
-            ConfiguredDocumentStream(
-                stream=DatDocumentStream(
-                    name="CSV",
-                    namespace="pytest_csv",
-                    sync_mode=SyncMode.INCREMENTAL
-                ),
+            DatDocumentStream(
+                name="CSV",
                 namespace="pytest_csv",
-                sync_mode=SyncMode.INCREMENTAL,
-                destination_sync_mode=DestinationSyncMode.APPEND
+                read_sync_mode=SyncMode.INCREMENTAL,
+                write_sync_mode=DestinationSyncMode.APPEND,
             )
         ]
     )
