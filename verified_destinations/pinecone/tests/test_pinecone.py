@@ -1,14 +1,15 @@
 import yaml
 import os
 from typing import List
-from dat_core.pydantic_models.connector_specification import ConnectorSpecification
 from dat_core.pydantic_models.dat_connection_status import Status
 from verified_destinations.pinecone.destination import Pinecone
-from dat_core.pydantic_models.dat_message import (DatMessage, DatDocumentMessage,
-                                         Data, DatStateMessage,
-                                         StreamState, StreamStatus,
-                                         DatDocumentStream, Type)
-from dat_core.pydantic_models import DatCatalog
+from dat_core.pydantic_models import (
+    DatMessage, DatDocumentMessage,
+    Data, DatStateMessage,
+    StreamState, StreamStatus,
+    DatDocumentStream, Type,
+    DatCatalog
+)
 
 class TestPinecone:
 
@@ -55,9 +56,9 @@ class TestPinecone:
                     emitted_at=1,
                     namespace=configured_catalog.document_streams[0].namespace,
                     stream=DatDocumentStream(
-                        name=configured_catalog.document_streams[0].stream.name,
+                        name=configured_catalog.document_streams[0].name,
                         namespace=configured_catalog.document_streams[0].namespace,
-                        read_sync_mode="incremental",
+                        read_sync_mode="INCREMENTAL",
                     ),
                 ),
             )
@@ -73,9 +74,9 @@ class TestPinecone:
                     emitted_at=2,
                     namespace=configured_catalog.document_streams[1].namespace,
                     stream=DatDocumentStream(
-                        name=configured_catalog.document_streams[1].stream.name,
+                        name=configured_catalog.document_streams[1].name,
                         namespace=configured_catalog.document_streams[1].namespace,
-                        read_sync_mode="incremental",
+                        read_sync_mode="INCREMENTAL",
                     )
                 ),
             )
@@ -113,9 +114,9 @@ class TestPinecone:
                 emitted_at=1,
                 namespace=configured_catalog.document_streams[0].namespace,
                 stream=DatDocumentStream(
-                    name=configured_catalog.document_streams[0].stream.name,
+                    name=configured_catalog.document_streams[0].name,
                     namespace=configured_catalog.document_streams[0].namespace,
-                    read_sync_mode="incremental",
+                    read_sync_mode="INCREMENTAL",
                 ),
             ),
         )
@@ -131,9 +132,9 @@ class TestPinecone:
                 emitted_at=2,
                 namespace=configured_catalog.document_streams[1].namespace,
                 stream=DatDocumentStream(
-                    name=configured_catalog.document_streams[1].stream.name,
+                    name=configured_catalog.document_streams[1].name,
                     namespace=configured_catalog.document_streams[1].namespace,
-                    read_sync_mode="incremental",
+                    read_sync_mode="INCREMENTAL",
                 )
             ),
         )
@@ -142,9 +143,9 @@ class TestPinecone:
                 type=Type.STATE,
                 state=DatStateMessage(
                     stream=DatDocumentStream(
-                        name=configured_catalog.document_streams[0].stream.name,
+                        name=configured_catalog.document_streams[0].name,
                         namespace=configured_catalog.document_streams[0].namespace,
-                        read_sync_mode="incremental"
+                        read_sync_mode="INCREMENTAL"
                     ),
                     stream_state=StreamState(
                         data={},
@@ -158,9 +159,9 @@ class TestPinecone:
                 type=Type.STATE,
                 state=DatStateMessage(
                     stream=DatDocumentStream(
-                        name=configured_catalog.document_streams[1].stream.name,
+                        name=configured_catalog.document_streams[1].name,
                         namespace=configured_catalog.document_streams[1].namespace,
-                        read_sync_mode="incremental",
+                        read_sync_mode="INCREMENTAL",
                     ),
                     stream_state=StreamState(
                         data={},
@@ -174,9 +175,9 @@ class TestPinecone:
                 type=Type.STATE,
                 state=DatStateMessage(
                     stream=DatDocumentStream(
-                        name=configured_catalog.document_streams[0].stream.name,
+                        name=configured_catalog.document_streams[0].name,
                         namespace=configured_catalog.document_streams[0].namespace,
-                        read_sync_mode="incremental",
+                        read_sync_mode="INCREMENTAL",
                     ),
                     stream_state=StreamState(
                         data={"last_emitted_at": 2},
@@ -188,9 +189,9 @@ class TestPinecone:
                 type=Type.STATE,
                 state=DatStateMessage(
                     stream=DatDocumentStream(
-                        name=configured_catalog.document_streams[1].stream.name,
+                        name=configured_catalog.document_streams[1].name,
                         namespace=configured_catalog.document_streams[1].namespace,
-                        read_sync_mode="incremental",
+                        read_sync_mode="INCREMENTAL",
                     ),
                     stream_state=StreamState(
                         data={"last_emitted_at": 2},

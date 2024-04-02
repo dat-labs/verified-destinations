@@ -18,11 +18,11 @@ class Mysql(Destination):
         """
         try:
             conn = mysql.connector.connect(
-                host=config.connectionSpecification['host'],
-                user=config.connectionSpecification['user'],
-                password=config.connectionSpecification['password'],
-                database=config.connectionSpecification['database'],
-                port=config.connectionSpecification['port']
+                host=config.connection_specification['host'],
+                user=config.connection_specification['user'],
+                password=config.connection_specification['password'],
+                database=config.connection_specification['database'],
+                port=config.connection_specification['port']
             )
             conn.close()
         except mysql.connector.Error as err:

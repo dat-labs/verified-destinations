@@ -4,7 +4,6 @@ from typing import Any, List, Optional, Dict
 from dat_core.connectors.destinations.vector_db_helpers.seeder import Seeder
 from qdrant_openapi_client.models import VectorParams, Distance
 from dat_core.pydantic_models.dat_message import DatDocumentMessage
-from dat_core.pydantic_models.stream_metadata import StreamMetadata
 
 
 DISTANCE_MAP = {
@@ -32,14 +31,14 @@ class QdrantSeeder(Seeder):
                 )
             )
         self._client.upload_points(
-            collection_name=self.config.connectionSpecification.get('collection'),
+            collection_name=self.config.connection_specification.get('collection'),
             points=points
         )
 
     def delete(self, filter, namespace=None):
         should_filter = self.metadata_filter(filter.model_dump())
         self._client.delete(
-            collection_name=self.config.connectionSpecification.get('collection'),
+            collection_name=self.config.connection_specification.get('collection'),
             points_selector=models.FilterSelector(
                 filter=models.Filter(
                     should=should_filter
@@ -56,8 +55,8 @@ class QdrantSeeder(Seeder):
             if not self._client:
                 return (False, "Qdrant is not alive")
             available_collections = [collection.name for collection in self._client.get_collections().collections]
-            distance = DISTANCE_MAP.get(self.config.connectionSpecification.get('distance'))
-            collection_name = self.config.connectionSpecification.get('collection')
+            distance = DISTANCE_MAP.get(self.config.connection_specification.get('distance'))
+            collection_name = self.config.connection_specification.get('collection')
             if collection_name in available_collections:
                 description = self._client.get_collection(collection_name=collection_name)
                 if description.config.params.vectors.size != self.embedding_dimensions:
@@ -66,7 +65,7 @@ class QdrantSeeder(Seeder):
                             f"but the configured dimension is {self.embedding_dimensions}.")
             else:
                 self._client.create_collection(
-                    collection_name=self.config.connectionSpecification.get('collection'),
+                    collection_name=self.config.connection_specification.get('collection'),
                     vectors_config=VectorParams(size=self.embedding_dimensions, distance=distance)
                 )
         except Exception as e:
@@ -74,18 +73,23 @@ class QdrantSeeder(Seeder):
         return True, description
 
     def _create_client(self):
-        url = self.config.connectionSpecification.get('url')
+        url = self.config.connection_specification.get('url')
         print(f"Qdrant url: {url}")
         self._client = QdrantClient(url)
     
     def scroll(self, scroll_filter: List[models.FieldCondition]):
         scroll_records = self._client.scroll(
-            collection_name=self.config.connectionSpecification.get('collection'),
+            collection_name=self.config.connection_specification.get('collection'),
             scroll_filter=models.Filter(
                 should=scroll_filter
             ),
         )
         return scroll_records[0]
+
+    def dest_sync(self, namespace: str) -> None:
+        """
+        TODO: Implement dest_sync
+        """
 
     def metadata_filter(self, metadata: Dict[Any, str]) -> Any:
         should_fields = []
