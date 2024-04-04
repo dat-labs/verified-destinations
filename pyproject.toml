@@ -1,0 +1,30 @@
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+name = "verified-destinations"
+version = "0.1.0"
+description = "Package to house dat verified destinations"
+authors = ["datLabs <team@datlabs.com>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+dat-core = { git = "ssh://git@github.com/riju-dc/dat-core", branch = "feature/base-classes" }
+# dat-core = {path = "../dat-core", develop = true}
+pinecone-client = {version = "^3.1.0", optional = true}
+qdrant-client = {version = "^1.8.0", optional = true}
+
+[tool.poetry.group.dev.dependencies]
+pydantic = "^2.6.3"
+pyyaml = "^6.0.1" 
+mypy = "^1.8.0"
+
+[tool.poetry.group.test.dependencies]
+pytest = "^8.1.1"
+
+[tool.poetry.extras]
+vector-db-based-dep = ["pinecone-client", "qdrant-client"]
+test = ["pytest"]
