@@ -1,11 +1,12 @@
 import uuid
 from pinecone import Pinecone
-from pinecone.core.client.exceptions import NotFoundException
 from typing import Any, List, Optional
 from dat_core.connectors.destinations.vector_db_helpers.seeder import Seeder
 from dat_core.connectors.destinations.vector_db_helpers.utils import create_chunks
-from dat_core.pydantic_models.dat_message import DatDocumentMessage
-from dat_core.pydantic_models.stream_metadata import StreamMetadata
+from dat_core.pydantic_models import (
+    DatDocumentMessage, StreamMetadata,
+    WriteSyncMode, DatCatalog
+)
 
 PINECONE_BATCH_SIZE = 40
 
@@ -75,19 +76,18 @@ class PineconeSeeder(Seeder):
             raise e
         return True, description
 
-    def dest_sync(self, namespace: str) -> None:
-        try:
-            self.pinecone_index.delete(delete_all=True, namespace=namespace)
-        except NotFoundException:
-            pass
+    def initiate_sync(self, configured_catalog: DatCatalog):
+        for stream in configured_catalog.document_streams:
+            if stream.write_sync_mode == WriteSyncMode.REPLACE:
+                self.delete(filter={self.METADATA_DAT_STREAM_FIELD: stream.name}, namespace=stream.namespace)
 
     def metadata_filter(self, metadata: StreamMetadata) -> Any:
-        meta_filter = {}
-        for key, value in metadata.model_dump().items():
-            if key in self.METADATA_FILTER_FIELDS:
-                meta_filter[key] = {"$eq": value}
-        
-        return meta_filter
+        meta_filter_fields = {}
+        for field in self.METADATA_FILTER_FIELDS:
+            if field in metadata.model_dump().keys():
+                meta_filter_fields[field] = {"$eq": getattr(metadata, field)}
+
+        return meta_filter_fields
 
     def _normalize_metadata(self, metadata: dict) -> dict:
         for key, value in metadata.items():

@@ -59,6 +59,7 @@ class TestPinecone:
                         name=configured_catalog.document_streams[0].name,
                         namespace=configured_catalog.document_streams[0].namespace,
                         read_sync_mode="INCREMENTAL",
+                        write_sync_mode="REPLACE",
                     ),
                 ),
             )
@@ -77,6 +78,7 @@ class TestPinecone:
                         name=configured_catalog.document_streams[1].name,
                         namespace=configured_catalog.document_streams[1].namespace,
                         read_sync_mode="INCREMENTAL",
+                        write_sync_mode="REPLACE",
                     )
                 ),
             )
@@ -113,11 +115,7 @@ class TestPinecone:
                 ),
                 emitted_at=1,
                 namespace=configured_catalog.document_streams[0].namespace,
-                stream=DatDocumentStream(
-                    name=configured_catalog.document_streams[0].name,
-                    namespace=configured_catalog.document_streams[0].namespace,
-                    read_sync_mode="INCREMENTAL",
-                ),
+                stream=configured_catalog.document_streams[0]
             ),
         )
         second_record = DatMessage(
@@ -131,22 +129,14 @@ class TestPinecone:
                 ),
                 emitted_at=2,
                 namespace=configured_catalog.document_streams[1].namespace,
-                stream=DatDocumentStream(
-                    name=configured_catalog.document_streams[1].name,
-                    namespace=configured_catalog.document_streams[1].namespace,
-                    read_sync_mode="INCREMENTAL",
-                )
+                stream=configured_catalog.document_streams[1]
             ),
         )
         mocked_input: List[DatMessage] = [
             DatMessage(
                 type=Type.STATE,
                 state=DatStateMessage(
-                    stream=DatDocumentStream(
-                        name=configured_catalog.document_streams[0].name,
-                        namespace=configured_catalog.document_streams[0].namespace,
-                        read_sync_mode="INCREMENTAL"
-                    ),
+                    stream=configured_catalog.document_streams[0],
                     stream_state=StreamState(
                         data={},
                         stream_status=StreamStatus.STARTED
@@ -158,11 +148,7 @@ class TestPinecone:
             DatMessage(
                 type=Type.STATE,
                 state=DatStateMessage(
-                    stream=DatDocumentStream(
-                        name=configured_catalog.document_streams[1].name,
-                        namespace=configured_catalog.document_streams[1].namespace,
-                        read_sync_mode="INCREMENTAL",
-                    ),
+                    stream=configured_catalog.document_streams[1],
                     stream_state=StreamState(
                         data={},
                         stream_status=StreamStatus.STARTED
@@ -174,11 +160,7 @@ class TestPinecone:
             DatMessage(
                 type=Type.STATE,
                 state=DatStateMessage(
-                    stream=DatDocumentStream(
-                        name=configured_catalog.document_streams[0].name,
-                        namespace=configured_catalog.document_streams[0].namespace,
-                        read_sync_mode="INCREMENTAL",
-                    ),
+                    stream=configured_catalog.document_streams[0],
                     stream_state=StreamState(
                         data={"last_emitted_at": 2},
                         stream_status=StreamStatus.COMPLETED
@@ -188,11 +170,7 @@ class TestPinecone:
             DatMessage(
                 type=Type.STATE,
                 state=DatStateMessage(
-                    stream=DatDocumentStream(
-                        name=configured_catalog.document_streams[1].name,
-                        namespace=configured_catalog.document_streams[1].namespace,
-                        read_sync_mode="INCREMENTAL",
-                    ),
+                    stream=configured_catalog.document_streams[1],
                     stream_state=StreamState(
                         data={"last_emitted_at": 2},
                         stream_status=StreamStatus.COMPLETED
@@ -207,9 +185,11 @@ class TestPinecone:
         )
         for doc in docs:
             print(f"doc: {doc}")
-            if doc.state.stream_state.stream_status == StreamStatus.COMPLETED:
-                comp_state_msgs.append(doc)
+            if doc.state:
+                if doc.state.stream_state.stream_status == StreamStatus.COMPLETED:
+                    comp_state_msgs.append(doc)
             assert isinstance(doc, DatMessage)
         assert len(comp_state_msgs) == 2
         assert comp_state_msgs[0].state.stream_state.stream_status == StreamStatus.COMPLETED
         assert comp_state_msgs[1].state.stream_state.stream_status == StreamStatus.COMPLETED
+        assert False

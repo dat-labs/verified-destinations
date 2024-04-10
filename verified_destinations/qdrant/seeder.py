@@ -3,7 +3,10 @@ from qdrant_client import QdrantClient, models
 from typing import Any, List, Optional, Dict
 from dat_core.connectors.destinations.vector_db_helpers.seeder import Seeder
 from qdrant_openapi_client.models import VectorParams, Distance
-from dat_core.pydantic_models.dat_message import DatDocumentMessage
+from dat_core.pydantic_models import (
+    DatDocumentMessage, DatCatalog,
+    WriteSyncMode, StreamMetadata
+)
 
 
 DISTANCE_MAP = {
@@ -36,7 +39,7 @@ class QdrantSeeder(Seeder):
         )
 
     def delete(self, filter, namespace=None):
-        should_filter = self.metadata_filter(filter.model_dump())
+        should_filter = self.metadata_filter(filter)
         self._client.delete(
             collection_name=self.config.connection_specification.get('collection'),
             points_selector=models.FilterSelector(
@@ -86,15 +89,27 @@ class QdrantSeeder(Seeder):
         )
         return scroll_records[0]
 
-    def dest_sync(self, namespace: str) -> None:
-        """
-        TODO: Implement dest_sync
-        """
+    def initiate_sync(self, configured_catalog: DatCatalog):
+        should_fields = []
+        for stream in configured_catalog.document_streams:
+            if stream.write_sync_mode == WriteSyncMode.REPLACE:
+                should_fields.append(models.FieldCondition(
+                    key=self.METADATA_DAT_STREAM_FIELD,
+                    match=models.MatchValue(value=stream.name)
+                ))
+        self._client.delete(
+            collection_name=self.config.connection_specification.get('collection'),
+            points_selector=models.FilterSelector(
+                filter=models.Filter(
+                    should=should_fields
+                ),
+            )
+        )
 
-    def metadata_filter(self, metadata: Dict[Any, str]) -> Any:
+    def metadata_filter(self, metadata: StreamMetadata) -> Any:
         should_fields = []
         for field in self.METADATA_FILTER_FIELDS:
-            if field in metadata:
+            if field in metadata.model_dump().keys():
                 should_fields.append(models.FieldCondition(
                     key=field,
                     match=models.MatchValue(value=metadata[field])
