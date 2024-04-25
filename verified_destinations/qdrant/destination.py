@@ -1,15 +1,15 @@
 import os
 from typing import Any, Tuple, Optional, Mapping, Iterable
-from dat_core.connectors.destinations.destination import Destination
-from dat_core.connectors.destinations.vector_db_helpers.data_processor import DataProcessor
+from dat_core.connectors.destinations.base import DestinationBase
+from dat_core.connectors.destinations.data_processor import DataProcessor
 from dat_core.pydantic_models import DatCatalog, DatMessage, ConnectorSpecification
 from verified_destinations.qdrant.seeder import QdrantSeeder
 
 
 BATCH_SIZE = 1000
 
-class Qdrant(Destination):
-    
+class Qdrant(DestinationBase):
+
     _spec_file = os.path.join(os.path.dirname(
         os.path.abspath(__file__)), 'specs.yml')
 

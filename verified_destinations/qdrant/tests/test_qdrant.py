@@ -1,15 +1,13 @@
 import os
 import yaml
 from typing import List
-from dat_core.pydantic_models.connector_specification import ConnectorSpecification
-from dat_core.pydantic_models.dat_connection_status import Status
-from verified_destinations.qdrant.destination import Qdrant
 from dat_core.pydantic_models import (
     DatMessage, DatDocumentMessage,
     Data, DatStateMessage, StreamState,
     StreamStatus, DatDocumentStream,
-    Type, DatCatalog
+    Type, DatCatalog, Status
 )
+from verified_destinations.qdrant.destination import Qdrant
 
 
 class TestQdrant:

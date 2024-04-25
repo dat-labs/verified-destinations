@@ -1,7 +1,7 @@
 import uuid
 from qdrant_client import QdrantClient, models
-from typing import Any, List, Optional, Dict
-from dat_core.connectors.destinations.vector_db_helpers.seeder import Seeder
+from typing import Any, List, Optional
+from dat_core.connectors.destinations.seeder import Seeder
 from qdrant_openapi_client.models import VectorParams, Distance
 from dat_core.pydantic_models import (
     DatDocumentMessage, DatCatalog,
