@@ -192,4 +192,3 @@ class TestPinecone:
         assert len(comp_state_msgs) == 2
         assert comp_state_msgs[0].state.stream_state.stream_status == StreamStatus.COMPLETED
         assert comp_state_msgs[1].state.stream_state.stream_status == StreamStatus.COMPLETED
-        assert False
