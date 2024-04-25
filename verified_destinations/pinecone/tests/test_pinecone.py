@@ -1,15 +1,15 @@
 import yaml
 import os
 from typing import List
-from dat_core.pydantic_models.dat_connection_status import Status
-from verified_destinations.pinecone.destination import Pinecone
 from dat_core.pydantic_models import (
     DatMessage, DatDocumentMessage,
     Data, DatStateMessage,
     StreamState, StreamStatus,
     DatDocumentStream, Type,
-    DatCatalog
+    DatCatalog, Status
 )
+from verified_destinations.pinecone.destination import Pinecone
+
 
 class TestPinecone:
 

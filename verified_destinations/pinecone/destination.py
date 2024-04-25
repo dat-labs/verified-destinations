@@ -3,15 +3,15 @@ from typing import Any, Iterable, Mapping, Tuple, Optional
 from dat_core.pydantic_models.connector_specification import ConnectorSpecification
 from dat_core.pydantic_models.dat_catalog import DatCatalog
 from dat_core.pydantic_models.dat_message import DatMessage
-from dat_core.connectors.destinations.destination import Destination
-from dat_core.connectors.destinations.vector_db_helpers.data_processor import DataProcessor
+from dat_core.connectors.destinations.base import DestinationBase
+from dat_core.connectors.destinations.data_processor import DataProcessor
 from verified_destinations.pinecone.seeder import PineconeSeeder
 
 
 BATCH_SIZE = 1000
 
 
-class Pinecone(Destination):
+class Pinecone(DestinationBase):
 
     _spec_file = os.path.join(os.path.dirname(
         os.path.abspath(__file__)), 'specs.yml')
