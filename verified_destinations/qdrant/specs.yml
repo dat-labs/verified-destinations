@@ -14,18 +14,42 @@ properties:
       - distance
     properties:
       url:
+        title: Qdrant URL
         description: Url of the Qdrant server
         type: string
         order: 0
       collection_name:
+        title: Collection name
         description: Name of the collection to use
         type: string
         order: 1
       distance:
+        title: Distance function
+        type: object
         description: Distance function to use
-        type: string
-        enum:
-          - dot
-          - cos
-          - euc
         order: 2
+        oneOf:
+        - title: dot
+          description: Use dot product as a distance function
+          required:
+          - distance
+          properties:
+            distance:
+              type: string
+              const: dot
+        - title: cos
+          description: Use cosine distance as a distance function
+          required:
+          - distance
+          properties:
+            distance:
+              type: string
+              const: cos
+        - title: euc
+          description: Use euclidean distance as a distance function
+          required:
+          - distance
+          properties:
+            distance:
+              type: string
+              const: euc

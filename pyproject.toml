@@ -14,8 +14,8 @@ readme = "README.md"
 python = "^3.10"
 dat-core = {git = "https://github.com/dat-labs/dat-core", rev = "main", develop = true}
 # dat-core = {path = "../dat-core", develop = true}
-pinecone-client = {version = "^3.1.0", optional = true}
-qdrant-client = {version = "^1.8.0", optional = true}
+pinecone-client = {version = "^3.1.0"}
+qdrant-client = {version = "^1.8.0"}
 
 [tool.poetry.group.dev.dependencies]
 pydantic = "^2.6.3"
