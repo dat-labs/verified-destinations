@@ -24,7 +24,3 @@ mypy = "^1.8.0"
 
 [tool.poetry.group.test.dependencies]
 pytest = "^8.1.1"
-
-[tool.poetry.extras]
-vector-db-based-dep = ["pinecone-client", "qdrant-client"]
-test = ["pytest"]
