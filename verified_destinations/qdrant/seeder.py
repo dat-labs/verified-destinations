@@ -34,14 +34,14 @@ class QdrantSeeder(Seeder):
                 )
             )
         self._client.upload_points(
-            collection_name=self.config.connection_specification.get('collection'),
+            collection_name=self.config.connection_specification.collection,
             points=points
         )
 
     def delete(self, filter, namespace=None):
         should_filter = self.metadata_filter(filter)
         self._client.delete(
-            collection_name=self.config.connection_specification.get('collection'),
+            collection_name=self.config.connection_specification.collection,
             points_selector=models.FilterSelector(
                 filter=models.Filter(
                     should=should_filter
@@ -58,8 +58,8 @@ class QdrantSeeder(Seeder):
             if not self._client:
                 return (False, "Qdrant is not alive")
             available_collections = [collection.name for collection in self._client.get_collections().collections]
-            distance = DISTANCE_MAP.get(self.config.connection_specification.get('distance'))
-            collection_name = self.config.connection_specification.get('collection')
+            distance = DISTANCE_MAP.get(self.config.connection_specification.distance)
+            collection_name = self.config.connection_specification.collection
             if collection_name in available_collections:
                 description = self._client.get_collection(collection_name=collection_name)
                 if description.config.params.vectors.size != self.embedding_dimensions:
@@ -68,7 +68,7 @@ class QdrantSeeder(Seeder):
                             f"but the configured dimension is {self.embedding_dimensions}.")
             else:
                 self._client.create_collection(
-                    collection_name=self.config.connection_specification.get('collection'),
+                    collection_name=self.config.connection_specification.collection,
                     vectors_config=VectorParams(size=self.embedding_dimensions, distance=distance)
                 )
         except Exception as e:
@@ -76,13 +76,13 @@ class QdrantSeeder(Seeder):
         return True, description
 
     def _create_client(self):
-        url = self.config.connection_specification.get('url')
+        url = self.config.connection_specification.url
         print(f"Qdrant url: {url}")
         self._client = QdrantClient(url)
     
     def scroll(self, scroll_filter: List[models.FieldCondition]):
         scroll_records = self._client.scroll(
-            collection_name=self.config.connection_specification.get('collection'),
+            collection_name=self.config.connection_specification.collection,
             scroll_filter=models.Filter(
                 should=scroll_filter
             ),
@@ -98,7 +98,7 @@ class QdrantSeeder(Seeder):
                     match=models.MatchValue(value=stream.name)
                 ))
         self._client.delete(
-            collection_name=self.config.connection_specification.get('collection'),
+            collection_name=self.config.connection_specification.collection,
             points_selector=models.FilterSelector(
                 filter=models.Filter(
                     should=should_fields

@@ -14,7 +14,7 @@ class Qdrant(DestinationBase):
         os.path.abspath(__file__)), 'specs.yml')
 
     def _init_seeder(self, config: Mapping[str, Any]) -> None:
-        self.seeder = QdrantSeeder(config, config.connection_specification.get('embedding_dimensions'))
+        self.seeder = QdrantSeeder(config, config.connection_specification.embedding_dimensions)
 
     def check_connection(self, config: ConnectorSpecification) -> Tuple[bool, Optional[Any]]:
         self._init_seeder(config)
