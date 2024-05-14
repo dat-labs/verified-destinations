@@ -13,9 +13,6 @@ BATCH_SIZE = 1000
 
 class Pinecone(DestinationBase):
 
-    _spec_file = os.path.join(os.path.dirname(
-        os.path.abspath(__file__)), 'specs.yml')
-
     def _init_seeder(self, config: Mapping[str, Any]) -> None:
         self.seeder = PineconeSeeder(config, config.connection_specification.embedding_dimensions)
 
