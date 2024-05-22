@@ -14,6 +14,9 @@ class ConnectionSpecificationModel(ConnectionSpecification):
         ..., description='Name of the Pinecone environment to use'
     )
     pinecone_api_key: str = Field(..., description='Pinecone API key')
+    embedding_dimensions: int = Field(
+        ..., description='Number of dimensions for the embeddings'
+    )
 
 
 class PineconeSpecification(BaseModel):

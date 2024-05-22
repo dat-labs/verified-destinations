@@ -12,6 +12,7 @@ properties:
       - pinecone_index
       - pinecone_environment
       - pinecone_api_key
+      - embedding_dimensions
     properties:
       pinecone_index:
         type: string
@@ -25,3 +26,7 @@ properties:
         type: string
         description: Pinecone API key
         order: 2
+      embedding_dimensions:
+        type: number
+        description: Configured embedding_dimensions of the Pinecone index
+        order: 3

@@ -20,7 +20,7 @@ class TestPinecone:
         THEN spec stated in ./specs/ConnectorSpecification.yml is returned
         """
         spec = Pinecone().spec()
-        current_dir = os.path.dirname(os.path.abspath(__file__))   
+        current_dir = os.path.dirname(os.path.abspath(__file__))
         yaml_path = os.path.join(current_dir, "..", "specs.yml")
         with open(yaml_path) as yaml_in:
             schema = yaml.safe_load(yaml_in)

@@ -19,11 +19,11 @@ MAX_IDS_PER_DELETE = 1000
 class PineconeSeeder(Seeder):
     def __init__(self, config: Any, embedding_dimensions: int):
         super().__init__(config)
-        self.pine = Pinecone(api_key=config.connection_specification.pinecone_api_key)
-        self.pinecone_index = self.pine.Index(config.connection_specification.pinecone_index)
         self.embedding_dimensions = embedding_dimensions
+        self.pine = Pinecone(api_key=config.connection_specification.pinecone_api_key)
 
     def seed(self, document_chunks: List[DatDocumentMessage], namespace: str, stream: str) -> None:
+        pinecone_index = self.pine.Index(self.config.connection_specification.pinecone_index)
         pinecone_docs = []
         for document_chunk in document_chunks:
             metadata = document_chunk.data.metadata.model_dump()
@@ -33,21 +33,23 @@ class PineconeSeeder(Seeder):
         serial_batches = create_chunks(pinecone_docs, batch_size=PINECONE_BATCH_SIZE * PARALLELISM_LIMIT)
         for batch in serial_batches:
             async_results = [
-                self.pinecone_index.upsert(vectors=ids_vectors_chunk, async_req=True, show_progress=False, namespace=namespace)
+                pinecone_index.upsert(vectors=ids_vectors_chunk, async_req=True, show_progress=False, namespace=namespace)
                 for ids_vectors_chunk in create_chunks(batch, batch_size=PINECONE_BATCH_SIZE)
             ]
             [async_result.get() for async_result in async_results]
 
     def delete(self, filter, namespace=None):
+        pinecone_index = self.pine.Index(self.config.connection_specification.pinecone_index)
         meta_filter = self.metadata_filter(filter)
         pod_type = self.pine.describe_index(self.config.connection_specification.pinecone_index).spec.pod.pod_type
         if pod_type == "starter":
             top_k = 10000
             self.delete_by_metadata(meta_filter, top_k, namespace)
         else:
-            self.pinecone_index.delete(filter=meta_filter, namespace=namespace)
+            pinecone_index.delete(filter=meta_filter, namespace=namespace)
 
     def delete_by_metadata(self, filter, top_k, namespace=None):
+        pinecone_index = self.pine.Index(self.config.connection_specification.pinecone_index)
         zero_vector = [0.0] * self.embedding_dimensions
         query_result = self.pinecone_index.query(
             vector=zero_vector, filter=filter, top_k=top_k, namespace=namespace)
@@ -57,8 +59,8 @@ class PineconeSeeder(Seeder):
                 # split into chunks of 1000 ids to avoid id limit
                 batches = create_chunks(vector_ids, batch_size=MAX_IDS_PER_DELETE)
                 for batch in batches:
-                    self.pinecone_index.delete(ids=list(batch), namespace=namespace)
-            query_result = self.pinecone_index.query(
+                    pinecone_index.delete(ids=list(batch), namespace=namespace)
+            query_result = pinecone_index.query(
                 vector=zero_vector, filter=filter, top_k=top_k, namespace=namespace)
 
     def check(self) -> Optional[str]:
@@ -73,7 +75,7 @@ class PineconeSeeder(Seeder):
                         (f"Index {index} has dimension {description.dimension} "
                          f"but configured dimension is {self.embedding_dimensions}."))
         except Exception as e:
-            raise e
+            return False, str(e)
         return True, description
 
     def initiate_sync(self, configured_catalog: DatCatalog):
