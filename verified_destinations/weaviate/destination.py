@@ -35,7 +35,3 @@ class Weaviate(DestinationBase):
         self._init_seeder(config)
         processor = DataProcessor(config, self.seeder, BATCH_SIZE)
         yield from processor.processor(configured_catalog, input_messages)
-
-
-if __name__ == '__main__':
-    print(Weaviate().spec())
