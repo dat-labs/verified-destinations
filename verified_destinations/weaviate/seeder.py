@@ -1,7 +1,7 @@
 import re
 import uuid
 from dat_core.pydantic_models import DatCatalog, StreamMetadata
-import weaviate as weaviate_client
+import weaviate
 from weaviate.exceptions import UnexpectedStatusCodeException
 from typing import Any, List, Optional, Tuple
 from dat_core.pydantic_models.dat_message import DatDocumentMessage
@@ -14,7 +14,6 @@ WEVIATE_BATCH_SIZE = 100
 class WeaviateSeeder(Seeder):
     def __init__(self, config: Any):
         super().__init__(config)
-        self._create_client()
 
     def seed(self, document_chunks: List[DatDocumentMessage], namespace: str, stream: str) -> None:
         chunks = create_chunks(document_chunks, batch_size=WEVIATE_BATCH_SIZE)
@@ -33,6 +32,7 @@ class WeaviateSeeder(Seeder):
                     )
 
     def delete(self, filter, namespace=None):
+        self._create_client()
         metadata_filters = self.metadata_filter(filter)
         combined_filter = {
             "operator": "And",
@@ -78,12 +78,12 @@ class WeaviateSeeder(Seeder):
         try:
             result = query.do()
             object_ids = [item["_additional"]["id"] for item in result["data"]["Get"][class_name]]
-            print(f"Object IDs: {object_ids}")
             return object_ids
         except UnexpectedStatusCodeException as e:
             return []
 
     def initiate_sync(self, configured_catalog: DatCatalog) -> None:
+        self._create_client()
         for stream in configured_catalog.document_streams:
             if stream.write_sync_mode == WriteSyncMode.REPLACE:
                 self.client.schema.delete_class(
@@ -91,16 +91,34 @@ class WeaviateSeeder(Seeder):
                 )
 
     def _create_client(self, ):
-        self.client = weaviate_client.Client(
-            url=self.config.connection_specification.cluster_url,
-        )
+        if self.config.connection_specification.authentication.get("authentication") == "basic_authentication":
+            auth = weaviate.AuthClientPassword(
+                username=self.config.connection_specification.authentication.get("username"),
+                password=self.config.connection_specification.authentication.get("password")
+            )
+            self.client = weaviate.Client(
+                url=self.config.connection_specification.cluster_url,
+                auth_client_secret=auth
+            )
+        elif self.config.connection_specification.authentication.get("authentication") == "api_key_authentication":
+            auth = weaviate.AuthApiKey(
+                api_key=self.config.connection_specification.authentication.get("api_key")
+            )
+            self.client = weaviate.Client(
+                url=self.config.connection_specification.cluster_url,
+                auth_client_secret=auth
+            )
+        else:
+            self.client = weaviate.Client(
+                url=self.config.connection_specification.cluster_url
+            )
 
     def _normalize_metadata(self, metadata: dict) -> dict:
         for key, value in metadata.items():
             if value is None:
                 metadata[key] = ""  # Set value to empty string if None
         return metadata
-    
+
     def _namespace_to_class_name(self, namespace: str) -> str:
         """
         Converts a namespace string to a class name by removing spaces,
@@ -125,5 +143,6 @@ class WeaviateSeeder(Seeder):
 """
 TODO: Complete create_client to support all type of authentications
 TODO: Test _namespace_to_class_name method with different inputs
+TODO: Figure out Multi-tenancy support
 
 """

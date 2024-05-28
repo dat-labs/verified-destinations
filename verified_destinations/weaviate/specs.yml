@@ -5,6 +5,15 @@ required:
   - connection_specification
 additionalProperties: true
 properties:
+  name: 
+    type: string
+    const: 'Weaviate'
+  module_name:
+    type: string
+    const: 'weaviate'
+  documentation_url:
+    type: string
+    default: 'https://www.semi.technology/documentation/weaviate/current'
   connection_specification:
     description: connection_specification specific blob. Must be a valid JSON string.
     type: object
@@ -57,7 +66,7 @@ properties:
             authentication:
               const: api_key_authentication
               type: string
-            api_key_authentication:
+            api_key:
               title: API key
               description: API Key of the Weaviate cluster
               type: string
