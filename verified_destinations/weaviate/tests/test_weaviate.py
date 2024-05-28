@@ -8,10 +8,10 @@ from dat_core.pydantic_models import (
     DatDocumentStream, Type,
     DatCatalog, Status
 )
-from verified_destinations.pinecone.destination import Pinecone
+from verified_destinations.weaviate.destination import Weaviate
 
 
-class TestPinecone:
+class TestWeaviate:
 
     def test_spec(self, ):
         """
@@ -19,7 +19,7 @@ class TestPinecone:
         WHEN spec() is called on a valid Destination class
         THEN spec stated in ./specs/ConnectorSpecification.yml is returned
         """
-        spec = Pinecone().spec()
+        spec = Weaviate().spec()
         current_dir = os.path.dirname(os.path.abspath(__file__))
         yaml_path = os.path.join(current_dir, "..", "specs.yml")
         with open(yaml_path) as yaml_in:
@@ -32,7 +32,7 @@ class TestPinecone:
         WHEN check() is called on a valid Destination class
         THEN no error is raised
         """
-        check = Pinecone().check(
+        check = Weaviate().check(
             config=config)
         print(check)
         assert check.status == Status.SUCCEEDED
@@ -86,7 +86,8 @@ class TestPinecone:
             first_record,
             second_record,
         ]
-        docs = Pinecone().write(
+        print(f"mocked_input: {mocked_input}")
+        docs = Weaviate().write(
             config=config,
             configured_catalog=configured_catalog,
             input_messages=mocked_input
@@ -178,7 +179,7 @@ class TestPinecone:
                 ),
             ),
         ]
-        docs = Pinecone().write(
+        docs = Weaviate().write(
             config=config,
             configured_catalog=configured_catalog,
             input_messages=mocked_input

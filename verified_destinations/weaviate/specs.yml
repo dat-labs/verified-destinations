@@ -1,0 +1,72 @@
+# ConnectorSpecification:
+description: Specification of Weaviate connector
+type: object
+required:
+  - connection_specification
+additionalProperties: true
+properties:
+  name: 
+    type: string
+    const: 'Weaviate'
+  module_name:
+    type: string
+    const: 'weaviate'
+  documentation_url:
+    type: string
+    default: 'https://www.semi.technology/documentation/weaviate/current'
+  connection_specification:
+    description: connection_specification specific blob. Must be a valid JSON string.
+    type: object
+    required:
+      - cluster_url
+      - authentication
+    properties:
+      cluster_url:
+        title: Weaviate cluster URL
+        description: URL of the Weaviate cluster
+        type: string
+        order: 0
+      authentication:
+        title: Authentication
+        description: Authentication method to use
+        type: object
+        order: 1
+        oneOf:
+        - title: No Authentication
+          type: object
+          properties:
+            authentication:
+              const: no_authentication
+              type: string
+          description: No authentication
+        - title: Basic Authentication
+          type: object
+          properties:
+            authentication:
+              const: basic_authentication
+              type: string
+            username:
+              title: Username
+              description: Username for the Weaviate cluster
+              order: 1
+              type: string
+            password:
+              title: Password
+              description: Password for the Weaviate cluster
+              order: 2
+              type: string
+          required:
+            - username
+            - password
+            - mode
+          description: Authenticate using username and password (suitable for self-managed Weaviate clusters)
+        - title: API key
+          type: object
+          properties:
+            authentication:
+              const: api_key_authentication
+              type: string
+            api_key:
+              title: API key
+              description: API Key of the Weaviate cluster
+              type: string
