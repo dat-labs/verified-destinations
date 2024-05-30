@@ -8,11 +8,11 @@ def _create_client():
         uri="http://localhost:19530",
     )
 
-collection_name = "pytest"
+collection_name = "pytest_collection"
 
 def load_data():
     client = _create_client()
-    client.create_collection(collection_name, dimension=5)
+    client.create_collection(collection_name, dimension=5, auto_id=True, enable_dynamic_field=True)
     data=[
     {"id": 0, "vector": [0.3580376395471989, -0.6023495712049978, 0.18414012509913835, -0.26286205330961354, 0.9029438446296592], "color": "pink_8682"},
     {"id": 1, "vector": [0.19886812562848388, 0.06023560599112088, 0.6976963061752597, 0.2614474506242501, 0.838729485096104], "color": "red_7025"},
@@ -25,10 +25,15 @@ def load_data():
     {"id": 8, "vector": [0.39524717779832685, 0.4000257286739164, -0.5890507376891594, -0.8650502298996872, -0.6140360785406336], "color": "white_9381"},
     {"id": 9, "vector": [0.5718280481994695, 0.24070317428066512, -0.3737913482606834, -0.06726932177492717, -0.6980531615588608], "color": "purple_4976"}
     ]
+    data_with_uuid_id_and_nore_random_dynamic_fields = [
+        { "vector": [0.3580376395471989, -0.6023495712049978, 0.18414012509913835, -0.26286205330961354, 0.9029438446296592], "color": "pink_8682", "random_field_1": "random_value_1", "random_field_2": "random_value_2"},
+        {"vector": [0.19886812562848388, 0.06023560599112088, 0.6976963061752597, 0.2614474506242501, 0.838729485096104], "color": "red_7025", "random_field_1": "random_value_1", "random_field_2": "random_value_2"},
+        {"vector": [0.43742130801983836, -0.5597502546264526, 0.6457887650909682, 0.7894058910881185, 0.20785793220625592], "color": "orange_6781", "random_field_1": "random_value_1", "random_field_2": "random_value_2"},
+    ]
 
     res = client.insert(
         collection_name=collection_name,
-        data=data
+        data=data_with_uuid_id_and_nore_random_dynamic_fields
     )
 
     print(res)
@@ -37,6 +42,8 @@ def load_data():
 def check():
     client = _create_client()
     # return client.has_collection("test_collection")
+    if not client.has_collection("test_collection"):
+        return False
     res = client.describe_collection(
         collection_name="test_collection"
     )
@@ -49,7 +56,20 @@ def delete():
 
     print("Collection dropped")
 
+def _search_by_dynamic_fields_and_print_result():
+    client = _create_client()
+    # _filter = 'color in ["red_7025", "red_4794"] or random_field_1 == "random_value_1" and random_field_2 == "random_value_2"'
+    _filter = 'meta == "Arbitrary"'
+    print(f"Searching for {_filter}")
+    res = client.query(
+        collection_name=collection_name,
+        filter=_filter,
+        partition_names=["pytest_pdf", "pytest_csv"]
+    )
+    print(res)
+
 if __name__ == "__main__":
-    # print(check())
+    print(check())
     # load_data()
-    delete()
+    # delete()
+    _search_by_dynamic_fields_and_print_result()

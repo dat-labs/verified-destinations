@@ -58,7 +58,6 @@ properties:
           required:
             - username
             - password
-            - mode
           description: Authenticate using username and password (suitable for self-managed Weaviate clusters)
         - title: API key
           type: object
