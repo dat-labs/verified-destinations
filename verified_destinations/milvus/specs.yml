@@ -1,0 +1,72 @@
+# ConnectorSpecification:
+description: Specification of a connector (source/embeddingsgenerator/destination)
+type: object
+required:
+  - connection_specification
+  - name
+  - module_name
+additionalProperties: true
+properties:
+  # General Properties (Common to all connectors)
+  documentation_url:
+    type: string
+    format: uri
+  name:
+    description: "The name of the specific connector to which this ConnectorSpecification belongs."
+    type: string
+  module_name:
+    description: "Name of the python module for this connector"
+    type: string
+  connection_specification:
+    description: ConnectorDefinition specific blob. Must be a valid JSON string.
+    type: object
+    properties:
+      uri:
+        title: URI
+        description: "URI to connect to the source"
+        type: string
+      collection_name:
+        title: Collection Name
+        description: "Name of the collection in the source"
+        type: string
+      embedding_dimension:
+        title: Embedding Dimension
+        description: "Dimension of the embeddings"
+        type: integer
+      authentication:
+        title: Authentication
+        description: Authentication method to use
+        type: object
+        order: 1
+        oneOf:
+        - title: No Authentication
+          type: object
+          properties:
+            authentication:
+              const: no_authentication
+              type: string
+          description: No authentication
+        - title: Basic Authentication
+          type: object
+          properties:
+            authentication:
+              const: basic_authentication
+              type: string
+            username:
+              title: Username
+              description: Username for the Weaviate cluster
+              order: 1
+              type: string
+            password:
+              title: Password
+              description: Password for the Weaviate cluster
+              order: 2
+              type: string
+          required:
+            - username
+            - password
+    required:
+      - uri
+      - collection_name
+      - embedding_dimension
+      - authentication
