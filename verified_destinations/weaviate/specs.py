@@ -49,7 +49,7 @@ class WeaviateSpecification(BaseModel):
     documentation_url: Optional[str] = (
         'https://www.semi.technology/documentation/weaviate/current'
     )
-    connection_specification: ConnectionSpecification = Field(
+    connection_specification: ConnectionSpecificationModel = Field(
         ...,
         description='connection_specification specific blob. Must be a valid JSON string.',
     )
