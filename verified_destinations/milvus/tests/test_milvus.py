@@ -1,12 +1,12 @@
 from typing import List
 from dat_core.pydantic_models import (
-    DatConnectionStatus, DatDocumentStream,
-    DatMessage, Data, Type,
-    DatCatalog, DatDocumentMessage
+    DatMessage, DatDocumentMessage,
+    Data, DatStateMessage,
+    StreamState, StreamStatus,
+    DatDocumentStream, Type,
+    DatCatalog, DatConnectionStatus,
 )
 from verified_destinations.milvus.destination import Milvus
-# from verified_destinations.milvus.catalog import MilvusCatalog
-from verified_destinations.milvus.specs import MilvusSpecification
 
 
 class TestMilvus:
@@ -80,6 +80,104 @@ class TestMilvus:
         for doc in docs:
             print(f"doc: {doc}")
             assert isinstance(doc, DatMessage)
+    
+    def test_write_multiple_streams(self, config, conf_catalog):
+        """
+        GIVEN a valid connectionSpecification JSON config
+        WHEN write() is called on a valid Destination class
+        THEN no error is raised
+        """
+        comp_state_msgs = []
+        configured_catalog = DatCatalog.model_validate_json(
+            conf_catalog.json())
+        first_record = DatMessage(
+            type=Type.RECORD,
+            record=DatDocumentMessage(
+                data=Data(
+                    document_chunk='foo',
+                    vectors=[1.0] * 1536,
+                    metadata={"meta": "Objective", "dat_source": "S3",
+                                "dat_stream": "PDF", "dat_document_entity": "DBT/DBT Overview.pdf"},
+                ),
+                emitted_at=1,
+                namespace=configured_catalog.document_streams[0].namespace,
+                stream=configured_catalog.document_streams[0]
+            ),
+        )
+        second_record = DatMessage(
+            type=Type.RECORD,
+            record=DatDocumentMessage(
+                data=Data(
+                    document_chunk='bar',
+                    vectors=[1.1] * 1536,
+                    metadata={"meta": "Arbitrary", "dat_source": "S3",
+                                "dat_stream": "CSV", "dat_document_entity": "Apple/DBT/DBT Overview.pdf"},
+                ),
+                emitted_at=2,
+                namespace=configured_catalog.document_streams[1].namespace,
+                stream=configured_catalog.document_streams[1]
+            ),
+        )
+        mocked_input: List[DatMessage] = [
+            DatMessage(
+                type=Type.STATE,
+                state=DatStateMessage(
+                    stream=configured_catalog.document_streams[0],
+                    stream_state=StreamState(
+                        data={},
+                        stream_status=StreamStatus.STARTED
+                    )
+                ),
+                record=first_record.record
+            ),
+            first_record,
+            DatMessage(
+                type=Type.STATE,
+                state=DatStateMessage(
+                    stream=configured_catalog.document_streams[1],
+                    stream_state=StreamState(
+                        data={},
+                        stream_status=StreamStatus.STARTED
+                    )
+                ),
+                record=second_record.record
+            ),
+            second_record,
+            DatMessage(
+                type=Type.STATE,
+                state=DatStateMessage(
+                    stream=configured_catalog.document_streams[0],
+                    stream_state=StreamState(
+                        data={"last_emitted_at": 2},
+                        stream_status=StreamStatus.COMPLETED
+                    )
+                ),
+            ),
+            DatMessage(
+                type=Type.STATE,
+                state=DatStateMessage(
+                    stream=configured_catalog.document_streams[1],
+                    stream_state=StreamState(
+                        data={"last_emitted_at": 2},
+                        stream_status=StreamStatus.COMPLETED
+                    )
+                ),
+            ),
+        ]
+        docs = Milvus().write(
+            config=config,
+            configured_catalog=configured_catalog,
+            input_messages=mocked_input
+        )
+        for doc in docs:
+            print(f"doc: {doc}")
+            if doc.state:
+                if doc.state.stream_state.stream_status == StreamStatus.COMPLETED:
+                    comp_state_msgs.append(doc)
+            assert isinstance(doc, DatMessage)
+        assert len(comp_state_msgs) == 2
+        assert comp_state_msgs[0].state.stream_state.stream_status == StreamStatus.COMPLETED
+        assert comp_state_msgs[1].state.stream_state.stream_status == StreamStatus.COMPLETED
 
 
     # def test_write(valid_connection_object, valid_catalog_object, valid_dat_record_message):

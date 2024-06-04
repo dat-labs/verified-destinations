@@ -38,6 +38,7 @@ class MilvusSeeder(Seeder):
         # ids = self._get_entity_ids(client, metadata_filter, namespace)
         # if not ids:
         #     return
+        print(f"Deleting entities with filter: {metadata_filter}")
         res = client.delete(
             collection_name=self.config.connection_specification.collection_name,
             filter=metadata_filter,
@@ -83,7 +84,7 @@ class MilvusSeeder(Seeder):
         filter_str = ''
         for field in self.METADATA_FILTER_FIELDS:
             if field in metadata.model_dump().keys():
-                filter_str += f'{field} == {metadata.model_dump()[field]} and '
+                filter_str += f'{field} == "{metadata.model_dump()[field]}" and '
         # Remove the last ' and ' from the string
         return filter_str[:-5]
 

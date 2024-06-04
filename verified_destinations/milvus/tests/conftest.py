@@ -43,7 +43,7 @@ def conf_catalog(request):
                 name="PDF",
                 namespace="pytest_pdf",
                 read_sync_mode=ReadSyncMode.INCREMENTAL,
-                write_sync_mode=WriteSyncMode.UPSERT,
+                write_sync_mode=WriteSyncMode.APPEND,
             ),
             DatDocumentStream(
                 name="CSV",

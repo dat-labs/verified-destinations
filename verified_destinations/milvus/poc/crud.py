@@ -41,11 +41,10 @@ def load_data():
 
 def check():
     client = _create_client()
-    # return client.has_collection("test_collection")
-    if not client.has_collection("test_collection"):
+    if not client.has_collection(collection_name):
         return False
     res = client.describe_collection(
-        collection_name="test_collection"
+        collection_name=collection_name
     )
 
     print(res)
@@ -59,14 +58,17 @@ def delete():
 def _search_by_dynamic_fields_and_print_result():
     client = _create_client()
     # _filter = 'color in ["red_7025", "red_4794"] or random_field_1 == "random_value_1" and random_field_2 == "random_value_2"'
-    _filter = 'meta == "Arbitrary"'
+    _filter = 'meta == "Arbitrary" or meta == "Objective"'
     print(f"Searching for {_filter}")
     res = client.query(
         collection_name=collection_name,
         filter=_filter,
         partition_names=["pytest_pdf", "pytest_csv"]
     )
-    print(res)
+    print(len(res))
+    # import pdb;pdb.set_trace()
+    for r in res:
+        print(f"ID: {r.get('id')}, Meta: {r.get('meta')}")
 
 if __name__ == "__main__":
     print(check())
