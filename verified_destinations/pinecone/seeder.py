@@ -19,7 +19,7 @@ MAX_IDS_PER_DELETE = 1000
 class PineconeSeeder(Seeder):
     def __init__(self, config: Any, embedding_dimensions: int):
         super().__init__(config)
-        self.embedding_dimensions = embedding_dimensions
+        self.embedding_dimensions = int(embedding_dimensions)
         self.pine = Pinecone(api_key=config.connection_specification.pinecone_api_key)
 
     def seed(self, document_chunks: List[DatDocumentMessage], namespace: str, stream: str) -> None:
