@@ -1,31 +1,38 @@
 # ConnectorSpecification:
-description: Specification of Weaviate connector
+description: Specification of a connector (source/embeddingsgenerator/destination)
 type: object
 required:
   - connection_specification
+  - name
+  - module_name
 additionalProperties: true
 properties:
-  name: 
-    type: string
-    const: 'Weaviate'
-  module_name:
-    type: string
-    const: 'weaviate'
+  # General Properties (Common to all connectors)
   documentation_url:
     type: string
-    default: 'https://www.semi.technology/documentation/weaviate/current'
+    format: uri
+  name:
+    description: "The name of the specific connector to which this ConnectorSpecification belongs."
+    type: string
+  module_name:
+    description: "Name of the python module for this connector"
+    type: string
   connection_specification:
-    description: connection_specification specific blob. Must be a valid JSON string.
+    description: ConnectorDefinition specific blob. Must be a valid JSON string.
     type: object
-    required:
-      - cluster_url
-      - authentication
     properties:
-      cluster_url:
-        title: Weaviate cluster URL
-        description: URL of the Weaviate cluster
+      uri:
+        title: URI
+        description: "URI to connect to the source"
         type: string
-        order: 0
+      collection_name:
+        title: Collection Name
+        description: "Name of the collection in the source"
+        type: string
+      embedding_dimension:
+        title: Embedding Dimension
+        description: "Dimension of the embeddings"
+        type: integer
       authentication:
         title: Authentication
         description: Authentication method to use
@@ -58,14 +65,8 @@ properties:
           required:
             - username
             - password
-          description: Authenticate using username and password (suitable for self-managed Weaviate clusters)
-        - title: API key
-          type: object
-          properties:
-            authentication:
-              const: api_key_authentication
-              type: string
-            api_key:
-              title: API key
-              description: API Key of the Weaviate cluster
-              type: string
+    required:
+      - uri
+      - collection_name
+      - embedding_dimension
+      - authentication

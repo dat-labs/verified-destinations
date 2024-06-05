@@ -1,23 +1,21 @@
 import os
-from typing import Any, Iterable, Mapping, Tuple, Optional
-from dat_core.pydantic_models.connector_specification import ConnectorSpecification
-from dat_core.pydantic_models.dat_catalog import DatCatalog
-from dat_core.pydantic_models.dat_message import DatMessage
+from typing import Any, Optional, Tuple, Iterable, Mapping
 from dat_core.connectors.destinations.base import DestinationBase
+from dat_core.pydantic_models import ConnectorSpecification
+from dat_core.pydantic_models import DatCatalog, DatMessage
 from dat_core.connectors.destinations.data_processor import DataProcessor
-from verified_destinations.weaviate.seeder import WeaviateSeeder
-from verified_destinations.weaviate.specs import WeaviateSpecification
+from verified_destinations.milvus.specs import MilvusSpecification
+from verified_destinations.milvus.seeder import MilvusSeeder
 
 
 BATCH_SIZE = 1000
 
+class Milvus(DestinationBase):
 
-class Weaviate(DestinationBase):
-
-    _spec_class = WeaviateSpecification
-
+    _spec_class = MilvusSpecification
+    
     def _init_seeder(self, config: Mapping[str, Any]) -> None:
-        self.seeder = WeaviateSeeder(config)
+        self.seeder = MilvusSeeder(config)
 
     def check_connection(self, config: ConnectorSpecification) -> Tuple[bool, Optional[Any]]:
         self._init_seeder(config)
