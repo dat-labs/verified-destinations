@@ -7,15 +7,29 @@ from __future__ import annotations
 from typing import Optional, Union, Literal
 
 from pydantic import BaseModel, Field
-from dat_core.pydantic_models import ConnectionSpecification
+from dat_core.pydantic_models import ConnectionSpecification, CustomGenerateJsonSchema
 
 
 class NoAuthentication(BaseModel):
-    authentication: str = Field('no_authentication', Literal=True)
+    authentication: str = Field(
+        'no_authentication',
+        json_schema_extra={
+            'ui-opts': {
+                'hidden': True,
+            }
+        }
+    )
 
 
 class BasicAuthentication(BaseModel):
-    authentication: str = Field('basic_authentication')
+    authentication: str = Field(
+        'basic_authentication',
+        json_schema_extra={
+            'ui-opts': {
+                'hidden': True,
+            }
+        }
+    )
     username: str = Field(
         ..., description='Username for the Weaviate cluster', title='Username'
     )
@@ -25,7 +39,14 @@ class BasicAuthentication(BaseModel):
 
 
 class APIKeyAuthentication(BaseModel):
-    authentication: str = Field('api_key_authentication')
+    authentication: str = Field(
+        'api_key_authentication',
+        json_schema_extra={
+            'ui-opts': {
+                'hidden': True,
+            }
+        }
+    )
     api_key: Optional[str] = Field(
         None, description='API Key of the Weaviate cluster', title='API key'
     )
@@ -35,15 +56,24 @@ class ConnectionSpecificationModel(ConnectionSpecification):
     cluster_url: str = Field(
         ..., description='URL of the Weaviate cluster', title='Weaviate cluster URL'
     )
-    authentication: Union[NoAuthentication, BasicAuthentication, APIKeyAuthentication] = Field(
-        ..., description='Authentication method to use', title='Authentication'
+    authentication: Optional[
+        Union[
+            NoAuthentication,
+            BasicAuthentication,
+            APIKeyAuthentication
+        ]
+     ] = Field(...,
+        description='Authentication method to use',
+        title='Authentication',
+        json_schema_extra={
+            'ui-opts': {
+                'widget': 'singleDropdown',
+            }
+        }
     )
 
 
 class WeaviateSpecification(BaseModel):
-    class Config:
-        extra = "allow"
-
     name: Literal['Weaviate']
     module_name: Literal['weaviate']
     documentation_url: Optional[str] = (

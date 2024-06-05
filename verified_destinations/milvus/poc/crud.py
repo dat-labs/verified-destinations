@@ -70,8 +70,16 @@ def _search_by_dynamic_fields_and_print_result():
     for r in res:
         print(f"ID: {r.get('id')}, Meta: {r.get('meta')}")
 
+def drop_partition():
+    client = _create_client()
+    client.drop_partition(collection_name="collection_name", partition_name="pytest_csv1")
+
+    print("Partition dropped")
+
+
 if __name__ == "__main__":
     print(check())
     # load_data()
     # delete()
-    _search_by_dynamic_fields_and_print_result()
+    # _search_by_dynamic_fields_and_print_result()
+    drop_partition()

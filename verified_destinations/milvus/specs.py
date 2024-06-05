@@ -10,13 +10,26 @@ from pydantic import BaseModel, Field
 from dat_core.pydantic_models import ConnectionSpecification
 
 
-
 class NoAuthentication(BaseModel):
-    authentication: str = Field('no_authentication')
+    authentication: str = Field(
+        'no_authentication',
+        json_schema_extra={
+            'ui-opts': {
+                'hidden': True,
+            }
+        }
+    )
 
 
 class BasicAuthentication(BaseModel):
-    authentication: str = Field('basic_authentication')
+    authentication: str = Field(
+        'basic_authentication',
+        json_schema_extra={
+            'ui-opts': {
+                'hidden': True,
+            }
+        }
+    )
     username: str = Field(
         ..., description='Username for the Weaviate cluster', title='Username'
     )
@@ -26,15 +39,25 @@ class BasicAuthentication(BaseModel):
 
 
 class MilvusConnection(ConnectionSpecification):
-    uri: str = Field(..., description='URI to connect to the source', title='URI')
+    uri: str = Field(...,
+                     description='URI to connect to the source', title='URI')
     collection_name: str = Field(
         ..., description='Name of the collection in the source', title='Collection Name'
     )
     embedding_dimension: int = Field(
         ..., description='Dimension of the embeddings', title='Embedding Dimension'
     )
-    authentication: Union[NoAuthentication, BasicAuthentication] = Field(
-        ..., description='Authentication method to use', title='Authentication'
+    authentication: Union[
+        NoAuthentication,
+        BasicAuthentication
+    ] = Field(...,
+              description='Authentication method to use',
+              title='Authentication',
+              json_schema_extra={
+                  'ui-opts': {
+                      'widget': 'singleDropdown',
+                  }
+              }
     )
 
 
@@ -45,7 +68,7 @@ class MilvusSpecification(BaseModel):
     name: Literal['Milvus']
     module_name: Literal['milvus']
     documentation_url: Optional[str] = (
-       'https://milvus.io/docs'
+        'https://milvus.io/docs'
     )
     connection_specification: MilvusConnection = Field(
         ...,

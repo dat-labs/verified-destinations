@@ -11,7 +11,8 @@ from verified_destinations.milvus.seeder import MilvusSeeder
 BATCH_SIZE = 1000
 
 class Milvus(DestinationBase):
-    _spec_file = MilvusSpecification
+
+    _spec_class = MilvusSpecification
     
     def _init_seeder(self, config: Mapping[str, Any]) -> None:
         self.seeder = MilvusSeeder(config)

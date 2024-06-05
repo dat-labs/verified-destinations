@@ -11,24 +11,54 @@ from dat_core.pydantic_models import ConnectionSpecification
 
 
 class Dot(BaseModel):
-    distance: str = Field('dot', const=True)
+    distance: str = Field(
+        'dot',
+        description='Dot product distance',
+        json_schema_extra={
+            'ui-opts': {
+                'hidden': True,
+            }
+        }
+    )
 
 
 class Cos(BaseModel):
-    distance: str = Field('cos', const=True)
+    distance: str = Field(
+        'cos',
+        description='Cosine distance',
+        json_schema_extra={
+            'ui-opts': {
+                'hidden': True,
+            }
+        }
+    )
 
 
 class Euc(BaseModel):
-    distance: str = Field('euc', const=True)
+    distance: str = Field(
+        'euc',
+        description='Euclidean distance',
+        json_schema_extra={
+            'ui-opts': {
+                'hidden': True,
+            }
+        }
+    )
 
 
 class ConnectionSpecificationModel(ConnectionSpecification):
-    url: str = Field(..., description='Url of the Qdrant server', title='Qdrant URL')
+    url: str = Field(..., description='Url of the Qdrant server',
+                     title='Qdrant URL')
     collection_name: str = Field(
         ..., description='Name of the collection to use', title='Collection name'
     )
     distance: Union[Euc, Cos, Dot] = Field(
-        ..., description='Distance function to use', title='Distance function'
+        ..., description='Distance function to use', title='Distance function',
+        json_schema_extra={
+            'ui-opts': {
+                'widget': 'singleDropdown',
+            }
+        }
     )
 
 

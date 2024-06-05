@@ -44,6 +44,8 @@ class MilvusSeeder(Seeder):
             filter=metadata_filter,
             partition_names=[namespace]
         )
+        print(f"Deleted {res['delete_count']} entities")
+
 
     def check(self) -> Tuple[bool, Optional[str]]:
         try:
@@ -97,10 +99,10 @@ class MilvusSeeder(Seeder):
         return [item["id"] for item in response]
 
     def initiate_sync(self, configured_catalog: DatCatalog) -> None:
-        client = self._create_client()
+        self._create_or_use_collection()
         for stream in configured_catalog.document_streams:
             if stream.write_sync_mode == WriteSyncMode.REPLACE:
-                client.drop_partition(
+                self.client.drop_partition(
                     collection_name=self.config.connection_specification.collection_name,
                     partition_name=stream.namespace
                 )

@@ -14,7 +14,7 @@ BATCH_SIZE = 1000
 
 class Weaviate(DestinationBase):
 
-    _spec_file = WeaviateSpecification
+    _spec_class = WeaviateSpecification
 
     def _init_seeder(self, config: Mapping[str, Any]) -> None:
         self.seeder = WeaviateSeeder(config)
