@@ -4,9 +4,9 @@
 
 from __future__ import annotations
 
-from typing import Union
+from typing import Union, Literal, Optional
 
-from pydantic import BaseModel, Field, Literal, Optional
+from pydantic import BaseModel, Field
 from dat_core.pydantic_models import ConnectionSpecification
 
 
