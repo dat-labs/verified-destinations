@@ -75,8 +75,10 @@ class MilvusSeeder(Seeder):
 
             if not id_field.get("is_primary", False):
                 return False, "ID field is not primary"
-            if collection_info.get("dimension") != self.config.connection_specification.embedding_dimension:
+
+            if vector_field.get("params", {}).get("dim", None) != self.config.connection_specification.embedding_dimension:
                 return False, "Dimension of the embeddings does not match"
+
             return True, None
         except Exception as e:
             print(e)
@@ -108,6 +110,7 @@ class MilvusSeeder(Seeder):
                 )
 
     def _create_client(self):
+        import pdb;pdb.set_trace()
         return MilvusClient(
             uri=self.config.connection_specification.uri,
             db_name=self.config.connection_specification.authentication.get(
@@ -123,6 +126,7 @@ class MilvusSeeder(Seeder):
     def _create_or_use_collection(self, ):
         collection_name = self.config.connection_specification.collection_name
         self.client = self._create_client()
+        print(f"client: {self.client}")
 
         if not self.client.has_collection(collection_name=collection_name):
             self.client.create_collection(
