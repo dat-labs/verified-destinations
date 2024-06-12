@@ -4,7 +4,7 @@
 
 from __future__ import annotations
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, Literal, Optional
 from dat_core.pydantic_models import ConnectionSpecification
 
 
@@ -20,7 +20,11 @@ class ConnectionSpecificationModel(ConnectionSpecification):
 
 
 class PineconeSpecification(BaseModel):
-
+    name: Literal['Pinecone']
+    module_name: Literal['pinecone']
+    documentation_url: Optional[str] = (
+        'https://datlabs.gitbook.io/datlabs/integrations/destinations/pinecone'
+    )
     connection_specification: ConnectionSpecificationModel = Field(
         ...,
         description='ConnectorDefinition specific blob. Must be a valid JSON string.',

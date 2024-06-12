@@ -77,7 +77,7 @@ class WeaviateSpecification(BaseModel):
     name: Literal['Weaviate']
     module_name: Literal['weaviate']
     documentation_url: Optional[str] = (
-        'https://www.semi.technology/documentation/weaviate/current'
+        'https://datlabs.gitbook.io/datlabs/integrations/destinations/weaviate'
     )
     connection_specification: ConnectionSpecificationModel = Field(
         ...,

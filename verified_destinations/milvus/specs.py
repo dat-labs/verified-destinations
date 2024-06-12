@@ -62,13 +62,10 @@ class MilvusConnection(ConnectionSpecification):
 
 
 class MilvusSpecification(BaseModel):
-    class Config:
-        extra = "allow"
-
     name: Literal['Milvus']
     module_name: Literal['milvus']
     documentation_url: Optional[str] = (
-        'https://milvus.io/docs'
+        'https://datlabs.gitbook.io/datlabs/integrations/destinations/milvus'
     )
     connection_specification: MilvusConnection = Field(
         ...,

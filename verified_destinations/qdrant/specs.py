@@ -6,7 +6,7 @@ from __future__ import annotations
 
 from typing import Union
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, Literal, Optional
 from dat_core.pydantic_models import ConnectionSpecification
 
 
@@ -63,7 +63,11 @@ class ConnectionSpecificationModel(ConnectionSpecification):
 
 
 class QdrantSpecification(BaseModel):
-
+    name: Literal['Qdrant']
+    module_name: Literal['qdrant']
+    documentation_url: Optional[str] = (
+        'https://datlabs.gitbook.io/datlabs/integrations/destinations/qdrant'
+    )
     connection_specification: ConnectionSpecificationModel = Field(
         ...,
         description='ConnectorDefinition specific blob. Must be a valid JSON string.',
