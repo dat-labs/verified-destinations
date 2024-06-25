@@ -29,8 +29,8 @@ properties:
         title: Collection Name
         description: "Name of the collection in the Database"
         type: string
-      embedding_dimension:
-        title: Embedding Dimension
+      embedding_dimensions:
+        title: Embedding Dimensions
         description: "Dimension of the embeddings"
         type: integer
       authentication:

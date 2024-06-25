@@ -44,8 +44,8 @@ class MilvusConnection(ConnectionSpecification):
     collection_name: str = Field(
         ..., description='Name of the collection in the Database', title='Collection Name'
     )
-    embedding_dimension: int = Field(
-        ..., description='Dimension of the embeddings', title='Embedding Dimension'
+    embedding_dimensions: int = Field(
+        ..., description='Dimension of the embeddings', title='Embedding Dimensions'
     )
     authentication: Union[
         NoAuthentication,

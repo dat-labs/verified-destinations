@@ -60,6 +60,9 @@ class ConnectionSpecificationModel(ConnectionSpecification):
             }
         }
     )
+    embedding_dimensions: int = Field(
+        ..., description='Number of dimensions for the embeddings'
+    )
 
 
 class QdrantSpecification(BaseModel):

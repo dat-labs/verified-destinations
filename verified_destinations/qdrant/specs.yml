@@ -12,6 +12,7 @@ properties:
       - url
       - collection_name
       - distance
+      - embedding_dimensions
     properties:
       url:
         title: Qdrant URL
@@ -53,3 +54,8 @@ properties:
             distance:
               type: string
               const: euc
+      embedding_dimensions:
+        title: Embedding dimensions
+        description: Number of dimensions in the embeddings
+        type: integer
+        order: 3

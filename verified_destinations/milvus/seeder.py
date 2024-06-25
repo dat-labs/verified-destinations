@@ -76,7 +76,7 @@ class MilvusSeeder(Seeder):
             if not id_field.get("is_primary", False):
                 return False, "ID field is not primary"
 
-            if vector_field.get("params", {}).get("dim", None) != self.config.connection_specification.embedding_dimension:
+            if vector_field.get("params", {}).get("dim", None) != self.config.connection_specification.embedding_dimensions:
                 return False, "Dimension of the embeddings does not match"
 
             return True, None
@@ -130,6 +130,6 @@ class MilvusSeeder(Seeder):
         if not self.client.has_collection(collection_name=collection_name):
             self.client.create_collection(
                 collection_name,
-                dimension=self.config.connection_specification.embedding_dimension,
+                dimension=self.config.connection_specification.embedding_dimensions,
                 auto_id=True
             )
