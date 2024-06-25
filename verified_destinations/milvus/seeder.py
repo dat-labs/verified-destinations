@@ -110,7 +110,6 @@ class MilvusSeeder(Seeder):
                 )
 
     def _create_client(self):
-        import pdb;pdb.set_trace()
         return MilvusClient(
             uri=self.config.connection_specification.uri,
             db_name=self.config.connection_specification.authentication.get(

@@ -31,18 +31,18 @@ class BasicAuthentication(BaseModel):
         }
     )
     username: str = Field(
-        ..., description='Username for the Weaviate cluster', title='Username'
+        ..., description='Username for the Milvus Database', title='Username'
     )
     password: str = Field(
-        ..., description='Password for the Weaviate cluster', title='Password'
+        ..., description='Password for the Milvus Database', title='Password'
     )
 
 
 class MilvusConnection(ConnectionSpecification):
     uri: str = Field(...,
-                     description='URI to connect to the source', title='URI')
+                     description='URI to connect to the Database', title='URI')
     collection_name: str = Field(
-        ..., description='Name of the collection in the source', title='Collection Name'
+        ..., description='Name of the collection in the Database', title='Collection Name'
     )
     embedding_dimension: int = Field(
         ..., description='Dimension of the embeddings', title='Embedding Dimension'

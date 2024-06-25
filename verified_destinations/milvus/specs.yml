@@ -23,11 +23,11 @@ properties:
     properties:
       uri:
         title: URI
-        description: "URI to connect to the source"
+        description: "URI to connect to the Database"
         type: string
       collection_name:
         title: Collection Name
-        description: "Name of the collection in the source"
+        description: "Name of the collection in the Database"
         type: string
       embedding_dimension:
         title: Embedding Dimension
@@ -54,12 +54,12 @@ properties:
               type: string
             username:
               title: Username
-              description: Username for the Weaviate cluster
+              description: Username for the Milvus Database
               order: 1
               type: string
             password:
               title: Password
-              description: Password for the Weaviate cluster
+              description: Password for the Milvus Database
               order: 2
               type: string
           required:
