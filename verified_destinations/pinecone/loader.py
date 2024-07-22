@@ -8,11 +8,11 @@ from dat_core.pydantic_models import (
     WriteSyncMode, DatCatalog
 )
 
-PINECONE_BATCH_SIZE = 40
+PINECONE_BATCH_SIZE = 100
 
 PARALLELISM_LIMIT = 4
 
-MAX_METADATA_SIZE = 40960 - 10000
+METADATA_SIZE = 40 # 40KB
 
 MAX_IDS_PER_DELETE = 1000
 

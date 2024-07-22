@@ -6,14 +6,13 @@ from dat_core.pydantic_models import DatCatalog, DatDocumentStream, ReadSyncMode
 
 @pytest.fixture(scope="class")
 def config(request):
-    current_dir = os.path.dirname(os.path.abspath(__file__))
-
-    # Construct the path to the JSON file
-    json_path = os.path.join(current_dir, "..", "secrets", "config.json")
-    # Read the JSON file and set the configuration value
-    config_data = ConnectorSpecification.model_validate_json(
-        open(json_path).read(), )
-    yield config_data
+    yield {
+        "clster_url": os.getenv("WEAVIATE_CLUSTER_URL"),
+        "authentication": {
+            "authentication": "api_key_authentication",
+            "api_key": os.getenv("WEAVIATE_API_KEY")
+        },
+    }
 
 
 @pytest.fixture(scope="class")
