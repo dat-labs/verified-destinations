@@ -7,7 +7,7 @@ from __future__ import annotations
 from typing import Optional, Union, Literal
 
 from pydantic import BaseModel, Field
-from dat_core.pydantic_models import ConnectionSpecification, CustomGenerateJsonSchema
+from dat_core.pydantic_models import ConnectionSpecification
 
 
 class NoAuthentication(BaseModel):

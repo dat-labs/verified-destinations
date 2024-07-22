@@ -6,9 +6,10 @@ from dat_core.pydantic_models import (
     Data, DatStateMessage,
     StreamState, StreamStatus,
     DatDocumentStream, Type,
-    DatCatalog, Status
+    DatCatalog, DatConnectionStatus,
 )
 from verified_destinations.weaviate.destination import Weaviate
+from verified_destinations.weaviate.specs import WeaviateSpecification
 
 
 class TestWeaviate:
@@ -26,16 +27,21 @@ class TestWeaviate:
             schema = yaml.safe_load(yaml_in)
             assert schema == spec
 
-    def test_check(self, config):
+    def test_check(self, valid_connection_object):
         """
         GIVEN a valid connectionSpecification JSON config
         WHEN check() is called on a valid Destination class
         THEN no error is raised
         """
-        check = Weaviate().check(
-            config=config)
-        print(check)
-        assert check.status == Status.SUCCEEDED
+        check_connection_tpl = Weaviate().check(
+            config=WeaviateSpecification(
+                name='Weaviate',
+                connection_specification=valid_connection_object,
+                module_name='weaviate'
+            )
+        )
+        assert isinstance(check_connection_tpl, DatConnectionStatus)
+        assert check_connection_tpl.status.name == 'SUCCEEDED'
 
     def test_write(self, config, conf_catalog):
         """
@@ -43,45 +49,46 @@ class TestWeaviate:
         WHEN write() is called on a valid Destination class
         THEN no error is raised
         """
-        configured_catalog = DatCatalog.model_validate_json(conf_catalog.json())
+        configured_catalog = DatCatalog.model_validate_json(
+            conf_catalog.json())
         first_record = DatMessage(
-                type=Type.RECORD,
-                record=DatDocumentMessage(
-                    data=Data(
-                        document_chunk='foo',
-                        vectors=[0.1] * 1536,
-                        metadata={"meta": "Objective", "dat_source": "S3",
-                                  "dat_stream": "PDF", "dat_document_entity": "DBT/DBT Overview.pdf"},
-                    ),
-                    emitted_at=1,
+            type=Type.RECORD,
+            record=DatDocumentMessage(
+                data=Data(
+                    document_chunk='foo',
+                    vectors=[0.1] * 1536,
+                    metadata={"meta": "Objective", "dat_source": "S3",
+                              "dat_stream": "PDF", "dat_document_entity": "DBT/DBT Overview.pdf"},
+                ),
+                emitted_at=1,
+                namespace=configured_catalog.document_streams[0].namespace,
+                stream=DatDocumentStream(
+                    name=configured_catalog.document_streams[0].name,
                     namespace=configured_catalog.document_streams[0].namespace,
-                    stream=DatDocumentStream(
-                        name=configured_catalog.document_streams[0].name,
-                        namespace=configured_catalog.document_streams[0].namespace,
-                        read_sync_mode="INCREMENTAL",
-                        write_sync_mode="REPLACE",
-                    ),
+                    read_sync_mode="INCREMENTAL",
+                    write_sync_mode="REPLACE",
                 ),
-            )
+            ),
+        )
         second_record = DatMessage(
-                type=Type.RECORD,
-                record=DatDocumentMessage(
-                    data=Data(
-                        document_chunk='bar',
-                        vectors=[1.0] * 1536,
-                        metadata={"meta": "Arbitrary", "dat_source": "S3",
-                                  "dat_stream": "CSV", "dat_document_entity": "Apple/DBT/DBT Overview.pdf"},
-                    ),
-                    emitted_at=2,
-                    namespace=configured_catalog.document_streams[1].namespace,
-                    stream=DatDocumentStream(
-                        name=configured_catalog.document_streams[1].name,
-                        namespace=configured_catalog.document_streams[1].namespace,
-                        read_sync_mode="INCREMENTAL",
-                        write_sync_mode="REPLACE",
-                    )
+            type=Type.RECORD,
+            record=DatDocumentMessage(
+                data=Data(
+                    document_chunk='bar',
+                    vectors=[1.0] * 1536,
+                    metadata={"meta": "Arbitrary", "dat_source": "S3",
+                              "dat_stream": "CSV", "dat_document_entity": "Apple/DBT/DBT Overview.pdf"},
                 ),
-            )
+                emitted_at=2,
+                namespace=configured_catalog.document_streams[1].namespace,
+                stream=DatDocumentStream(
+                    name=configured_catalog.document_streams[1].name,
+                    namespace=configured_catalog.document_streams[1].namespace,
+                    read_sync_mode="INCREMENTAL",
+                    write_sync_mode="REPLACE",
+                )
+            ),
+        )
         mocked_input: List[DatMessage] = [
             first_record,
             second_record,
@@ -112,7 +119,7 @@ class TestWeaviate:
                     document_chunk='foo',
                     vectors=[1.0] * 1536,
                     metadata={"meta": "Objective", "dat_source": "S3",
-                                "dat_stream": "PDF", "dat_document_entity": "DBT/DBT Overview.pdf"},
+                              "dat_stream": "PDF", "dat_document_entity": "DBT/DBT Overview.pdf"},
                 ),
                 emitted_at=1,
                 namespace=configured_catalog.document_streams[0].namespace,
@@ -126,7 +133,7 @@ class TestWeaviate:
                     document_chunk='bar',
                     vectors=[1.1] * 1536,
                     metadata={"meta": "Arbitrary", "dat_source": "S3",
-                                "dat_stream": "CSV", "dat_document_entity": "Apple/DBT/DBT Overview.pdf"},
+                              "dat_stream": "CSV", "dat_document_entity": "Apple/DBT/DBT Overview.pdf"},
                 ),
                 emitted_at=2,
                 namespace=configured_catalog.document_streams[1].namespace,

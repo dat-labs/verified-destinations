@@ -12,7 +12,7 @@ BATCH_SIZE = 1000
 
 
 class Pinecone(DestinationBase):
-    
+
     _spec_class = PineconeSpecification
 
     def _init_seeder(self, config: Mapping[str, Any]) -> None:
