@@ -5,7 +5,7 @@ from dat_core.pydantic_models.dat_catalog import DatCatalog
 from dat_core.pydantic_models.dat_message import DatMessage
 from dat_core.connectors.destinations.base import DestinationBase
 from dat_core.connectors.destinations.data_processor import DataProcessor
-from verified_destinations.weaviate.seeder import WeaviateSeeder
+from verified_destinations.weaviate.loader import WeaviateLoader
 from verified_destinations.weaviate.specs import WeaviateSpecification
 
 
@@ -16,13 +16,13 @@ class Weaviate(DestinationBase):
 
     _spec_class = WeaviateSpecification
 
-    def _init_seeder(self, config: Mapping[str, Any]) -> None:
-        self.seeder = WeaviateSeeder(config)
+    def _init_loader(self, config: Mapping[str, Any]) -> None:
+        self.loader = WeaviateLoader(config)
 
     def check_connection(self, config: ConnectorSpecification) -> Tuple[bool, Optional[Any]]:
-        self._init_seeder(config)
+        self._init_loader(config)
         try:
-            check, desc = self.seeder.check()
+            check, desc = self.loader.check()
             return (check, desc)
         except Exception as e:
             return (False, e)
@@ -32,6 +32,6 @@ class Weaviate(DestinationBase):
         config: Mapping[str, Any], configured_catalog: DatCatalog,
         input_messages: Iterable[DatMessage]
     ) -> Iterable[DatMessage]:
-        self._init_seeder(config)
-        processor = DataProcessor(config, self.seeder, BATCH_SIZE)
+        self._init_loader(config)
+        processor = DataProcessor(config, self.loader, BATCH_SIZE)
         yield from processor.processor(configured_catalog, input_messages)

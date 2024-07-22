@@ -1,7 +1,7 @@
 import uuid
 from qdrant_client import QdrantClient, models
 from typing import Any, List, Optional
-from dat_core.connectors.destinations.seeder import Seeder
+from dat_core.connectors.destinations.loader import Loader
 from qdrant_openapi_client.models import VectorParams, Distance
 from dat_core.pydantic_models import (
     DatDocumentMessage, DatCatalog,
@@ -15,13 +15,13 @@ DISTANCE_MAP = {
     "euc": Distance.EUCLID,
 }
 
-class QdrantSeeder(Seeder):
+class QdrantLoader(Loader):
     def __init__(self, config: Any, embedding_dimensions: int):
         super().__init__(config)
         self.embedding_dimensions = embedding_dimensions
         self._create_client()
 
-    def seed(self, document_chunks: List[DatDocumentMessage], namespace: str, stream: str) -> None:
+    def load(self, document_chunks: List[DatDocumentMessage], namespace: str, stream: str) -> None:
         points = []
         for document_chunk in document_chunks:
             metadata = document_chunk.data.metadata.model_dump()
