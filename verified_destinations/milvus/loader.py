@@ -2,18 +2,18 @@ from pymilvus import MilvusClient
 from typing import Any, List, Optional, Tuple
 from dat_core.pydantic_models import DatCatalog, StreamMetadata
 from dat_core.pydantic_models.dat_message import DatDocumentMessage
-from dat_core.connectors.destinations.seeder import Seeder
+from dat_core.connectors.destinations.loader import Loader
 from dat_core.connectors.destinations.utils import create_chunks
 from dat_core.pydantic_models import WriteSyncMode
 
 MILVUS_BATCH_SIZE = 100
 
 
-class MilvusSeeder(Seeder):
+class MilvusLoader(Loader):
     def __init__(self, config: Any):
         super().__init__(config)
 
-    def seed(self, document_chunks: List[DatDocumentMessage], namespace: str, stream: str) -> None:
+    def load(self, document_chunks: List[DatDocumentMessage], namespace: str, stream: str) -> None:
         self._create_or_use_collection()
         chunks = create_chunks(document_chunks, batch_size=MILVUS_BATCH_SIZE)
         data = []

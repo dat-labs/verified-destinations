@@ -1,7 +1,7 @@
 import uuid
 from pinecone import Pinecone
 from typing import Any, List, Optional
-from dat_core.connectors.destinations.seeder import Seeder
+from dat_core.connectors.destinations.loader import Loader
 from dat_core.connectors.destinations.utils import create_chunks
 from dat_core.pydantic_models import (
     DatDocumentMessage, StreamMetadata,
@@ -16,13 +16,13 @@ METADATA_SIZE = 40 # 40KB
 
 MAX_IDS_PER_DELETE = 1000
 
-class PineconeSeeder(Seeder):
+class PineconeLoader(Loader):
     def __init__(self, config: Any, embedding_dimensions: int):
         super().__init__(config)
         self.embedding_dimensions = int(embedding_dimensions)
         self.pine = Pinecone(api_key=config.connection_specification.pinecone_api_key)
 
-    def seed(self, document_chunks: List[DatDocumentMessage], namespace: str, stream: str) -> None:
+    def load(self, document_chunks: List[DatDocumentMessage], namespace: str, stream: str) -> None:
         pinecone_index = self.pine.Index(self.config.connection_specification.pinecone_index)
         pinecone_docs = []
         for document_chunk in document_chunks:

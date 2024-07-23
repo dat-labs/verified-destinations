@@ -5,13 +5,13 @@ import weaviate
 from weaviate.exceptions import UnexpectedStatusCodeException
 from typing import Any, List, Optional, Tuple
 from dat_core.pydantic_models.dat_message import DatDocumentMessage
-from dat_core.connectors.destinations.seeder import Seeder
+from dat_core.connectors.destinations.loader import Loader
 from dat_core.connectors.destinations.utils import create_chunks
 from dat_core.pydantic_models import WriteSyncMode
 
 WEVIATE_BATCH_SIZE = 100
 
-class WeaviateSeeder(Seeder):
+class WeaviateLoader(Loader):
     def __init__(self, config: Any):
         super().__init__(config)
 
