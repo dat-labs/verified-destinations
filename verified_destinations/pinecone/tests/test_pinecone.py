@@ -9,6 +9,7 @@ from dat_core.pydantic_models import (
     DatCatalog, Status
 )
 from verified_destinations.pinecone.destination import Pinecone
+from verified_destinations.pinecone.specs import PineconeSpecification
 
 
 class TestPinecone:
@@ -26,30 +27,39 @@ class TestPinecone:
             schema = yaml.safe_load(yaml_in)
             assert schema == spec
 
-    def test_check(self, config):
+    def test_check(self, valid_connection_specification):
         """
         GIVEN a valid connectionSpecification JSON config
         WHEN check() is called on a valid Destination class
         THEN no error is raised
         """
         check = Pinecone().check(
-            config=config)
+            config=PineconeSpecification(
+                name='Pinecone',
+                module_name='pinecone',
+                connection_specification=valid_connection_specification
+            ))
         print(check)
         assert check.status == Status.SUCCEEDED
 
-    def test_write(self, config, conf_catalog):
+    def test_write(self, valid_connection_specification, valid_document_streams):
         """
         GIVEN a valid connectionSpecification JSON config
         WHEN write() is called on a valid Destination class
         THEN no error is raised
         """
-        configured_catalog = DatCatalog.model_validate_json(conf_catalog.json())
+        config = PineconeSpecification(
+            name='Pinecone',
+            module_name='pinecone',
+            connection_specification=valid_connection_specification
+        )
+        configured_catalog = DatCatalog(**valid_document_streams)
         first_record = DatMessage(
                 type=Type.RECORD,
                 record=DatDocumentMessage(
                     data=Data(
                         document_chunk='foo',
-                        vectors=[0.1] * 1536,
+                        vectors=[0.1] * config.connection_specification.embedding_dimensions,
                         metadata={"meta": "Objective", "dat_source": "S3",
                                   "dat_stream": "PDF", "dat_document_entity": "DBT/DBT Overview.pdf"},
                     ),
@@ -68,7 +78,7 @@ class TestPinecone:
                 record=DatDocumentMessage(
                     data=Data(
                         document_chunk='bar',
-                        vectors=[1.0] * 1536,
+                        vectors=[1.0] * config.connection_specification.embedding_dimensions,
                         metadata={"meta": "Arbitrary", "dat_source": "S3",
                                   "dat_stream": "CSV", "dat_document_entity": "Apple/DBT/DBT Overview.pdf"},
                     ),

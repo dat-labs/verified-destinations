@@ -4,34 +4,30 @@ from dat_core.pydantic_models.connector_specification import ConnectorSpecificat
 from dat_core.pydantic_models import DatCatalog, DatDocumentStream, ReadSyncMode, WriteSyncMode
 
 
-@pytest.fixture(scope="class")
-def config(request):
-    current_dir = os.path.dirname(os.path.abspath(__file__))
+@pytest.fixture()
+def valid_connection_specification():
+    yield {
+        'pinecone_index': os.getenv('PINECONE_INDEX'),
+        'pinecone_api_key': os.getenv('PINECONE_API_KEY'),
+        'pinecone_environment': os.getenv('PINECONE_ENVIRONMENT'),
+        'embedding_dimensions': os.getenv('PINECONE_EMBEDDING_DIMENSIONS'),
+    }
 
-    # Construct the path to the JSON file
-    json_path = os.path.join(current_dir, "..", "secrets", "config.json")
-    # Read the JSON file and set the configuration value
-    config_data = ConnectorSpecification.model_validate_json(
-        open(json_path).read(), )
-    yield config_data
-
-
-@pytest.fixture(scope="class")
-def conf_catalog(request):
-    conf_catalog = DatCatalog(
-        document_streams=[
-            DatDocumentStream(
-                name="PDF",
-                namespace="pytest_pdf",
-                read_sync_mode=ReadSyncMode.INCREMENTAL,
-                write_sync_mode=WriteSyncMode.UPSERT,
-            ),
-            DatDocumentStream(
-                name="CSV",
-                namespace="pytest_csv",
-                read_sync_mode=ReadSyncMode.INCREMENTAL,
-                write_sync_mode=WriteSyncMode.APPEND,
-            )
+@pytest.fixture()
+def valid_document_streams():
+    yield {
+        'document_streams': [
+            {
+                'name': 'PDF',
+                'namespace': 'pytest_pdf',
+                'read_sync_mode': 'INCREMENTAL',
+                'write_sync_mode': 'UPSERT',
+            },
+            {
+                'name': 'CSV',
+                'namespace': 'pytest_csv',
+                'read_sync_mode': 'INCREMENTAL',
+                'write_sync_mode': 'APPEND',
+            }
         ]
-    )
-    yield conf_catalog
+    }
