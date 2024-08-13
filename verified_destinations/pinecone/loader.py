@@ -16,7 +16,6 @@ METADATA_SIZE = 40  # 40KB
 
 MAX_IDS_PER_DELETE = 1000
 
-
 class PineconeLoader(Loader):
     def __init__(self, config: Any, embedding_dimensions: int):
         super().__init__(config)
