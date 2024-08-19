@@ -10,11 +10,18 @@ from dat_core.pydantic_models import ConnectionSpecification
 
 
 class ConnectionSpecificationModel(ConnectionSpecification):
-    pinecone_index: str = Field(..., description='Name of the Pinecone index to use')
+    pinecone_index: str = Field(...,
+                                description='Name of the Pinecone index to use')
     pinecone_environment: str = Field(
         ..., description='Name of the Pinecone environment to use'
     )
-    pinecone_api_key: str = Field(..., description='Pinecone API key')
+    pinecone_api_key: str = Field(...,
+                                  description='Pinecone API key',
+                                  json_schema_extra={
+                                      'ui-opts': {
+                                          'masked': True,
+                                      }
+                                  })
     embedding_dimensions: int = Field(
         ..., description='Number of dimensions for the embeddings'
     )
