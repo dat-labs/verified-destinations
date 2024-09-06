@@ -7,7 +7,7 @@ from dat_core.pydantic_models import (
     DatCatalog, DatConnectionStatus,
 )
 from verified_destinations.milvus.destination import Milvus
-
+from dat_core.loggers import logger
 
 class TestMilvus:
     def test_check(self, config):
@@ -18,7 +18,7 @@ class TestMilvus:
         """
         check_connection_tpl = Milvus().check(
             config=config)
-        print(check_connection_tpl)
+        logger.debug(check_connection_tpl)
         assert isinstance(check_connection_tpl, DatConnectionStatus)
         assert check_connection_tpl.status.name == 'SUCCEEDED'
     
@@ -71,14 +71,14 @@ class TestMilvus:
             first_record,
             second_record,
         ]
-        print(f"mocked_input: {mocked_input}")
+        logger.debug(f"mocked_input: {mocked_input}")
         docs = Milvus().write(
             config=config,
             configured_catalog=configured_catalog,
             input_messages=mocked_input
         )
         for doc in docs:
-            print(f"doc: {doc}")
+            logger.debug(f"doc: {doc}")
             assert isinstance(doc, DatMessage)
     
     def test_write_multiple_streams(self, config, conf_catalog):
@@ -170,7 +170,7 @@ class TestMilvus:
             input_messages=mocked_input
         )
         for doc in docs:
-            print(f"doc: {doc}")
+            logger.debug(f"doc: {doc}")
             if doc.state:
                 if doc.state.stream_state.stream_status == StreamStatus.COMPLETED:
                     comp_state_msgs.append(doc)

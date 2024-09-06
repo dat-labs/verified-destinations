@@ -2,12 +2,12 @@ import uuid
 from qdrant_client import QdrantClient, models
 from typing import Any, List, Optional
 from dat_core.connectors.destinations.loader import Loader
-from qdrant_openapi_client.models import VectorParams, Distance
+from qdrant_client.models import VectorParams, Distance
 from dat_core.pydantic_models import (
     DatDocumentMessage, DatCatalog,
     WriteSyncMode, StreamMetadata
 )
-
+from dat_core.loggers import logger
 
 DISTANCE_MAP = {
     "dot": Distance.DOT,
@@ -77,7 +77,7 @@ class QdrantLoader(Loader):
 
     def _create_client(self):
         url = self.config.connection_specification.url
-        print(f"Qdrant url: {url}")
+        logger.debug(f"Qdrant url: {url}")
         self._client = QdrantClient(url)
 
     def scroll(self, scroll_filter: List[models.FieldCondition]):
@@ -97,7 +97,7 @@ class QdrantLoader(Loader):
                     key=self.METADATA_DAT_STREAM_FIELD,
                     match=models.MatchValue(value=stream.name)
                 ))
-        print(f"should_fields: {should_fields}")
+        logger.debug(f"should_fields: {should_fields}")
         # self._client.delete(
         #     collection_name=self.config.connection_specification.collection_name,
         #     points_selector=models.FilterSelector(

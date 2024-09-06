@@ -9,4 +9,4 @@ class_name = "Question"
 
 response = client.schema.get(class_name)
 
-print(json.dumps(response, indent=2))
+logger.debug(json.dumps(response, indent=2))

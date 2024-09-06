@@ -5,6 +5,7 @@ from dat_core.pydantic_models.dat_message import DatDocumentMessage
 from dat_core.connectors.destinations.loader import Loader
 from dat_core.connectors.destinations.utils import create_chunks
 from dat_core.pydantic_models import WriteSyncMode
+from dat_core.loggers import logger
 
 MILVUS_BATCH_SIZE = 100
 
@@ -38,13 +39,13 @@ class MilvusLoader(Loader):
         # ids = self._get_entity_ids(client, metadata_filter, namespace)
         # if not ids:
         #     return
-        print(f"Deleting entities with filter: {metadata_filter}")
+        logger.debug(f"Deleting entities with filter: {metadata_filter}")
         res = client.delete(
             collection_name=self.config.connection_specification.collection_name,
             filter=metadata_filter,
             partition_names=[namespace]
         )
-        print(f"Deleted {res['delete_count']} entities")
+        logger.debug(f"Deleted {res['delete_count']} entities")
 
 
     def check(self) -> Tuple[bool, Optional[str]]:
@@ -52,7 +53,7 @@ class MilvusLoader(Loader):
             self._create_or_use_collection()
             collection_info = self.client.describe_collection(
                 self.config.connection_specification.collection_name)
-            print(f"Collection info: {collection_info}")
+            logger.debug(f"Collection info: {collection_info}")
             # Check if enable_dynamic_field is True
             if not collection_info.get("enable_dynamic_field", False):
                 return False, "Dynamic fields are not enabled."
@@ -81,7 +82,7 @@ class MilvusLoader(Loader):
 
             return True, None
         except Exception as e:
-            print(e)
+            logger.debug(e)
             return False, str(e)
 
     def metadata_filter(self, metadata: StreamMetadata) -> Any:
@@ -125,7 +126,7 @@ class MilvusLoader(Loader):
     def _create_or_use_collection(self, ):
         collection_name = self.config.connection_specification.collection_name
         self.client = self._create_client()
-        print(f"client: {self.client}")
+        logger.debug(f"client: {self.client}")
 
         if not self.client.has_collection(collection_name=collection_name):
             self.client.create_collection(
