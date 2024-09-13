@@ -35,7 +35,7 @@ def print_batch(collection_name, batch, cursor=None):
             break
 
         # Here is your next batch of objects
-        print(next_batch)
+        logger.debug(next_batch)
 
         # Move the cursor to the last returned uuid
         cursor=next_batch[-1]["_additional"]["id"]
@@ -47,4 +47,4 @@ if __name__ == "__main__":
     client.schema.delete_class("Pytest_csv")
     # response = client.schema.get()
 
-    # print(json.dumps(response, indent=2))
+    # logger.debug(json.dumps(response, indent=2))

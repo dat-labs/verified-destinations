@@ -9,7 +9,7 @@ from dat_core.pydantic_models import (
     DatCatalog, Status
 )
 from verified_destinations.pinecone.destination import Pinecone
-
+from dat_core.loggers import logger
 
 class TestPinecone:
 
@@ -34,7 +34,7 @@ class TestPinecone:
         """
         check = Pinecone().check(
             config=config)
-        print(check)
+        logger.debug(check)
         assert check.status == Status.SUCCEEDED
 
     def test_write(self, config, conf_catalog):
@@ -92,7 +92,7 @@ class TestPinecone:
             input_messages=mocked_input
         )
         for doc in docs:
-            print(f"doc: {doc}")
+            logger.debug(f"doc: {doc}")
             assert isinstance(doc, DatMessage)
 
     def test_write_multiple_streams(self, config, conf_catalog):
@@ -184,7 +184,7 @@ class TestPinecone:
             input_messages=mocked_input
         )
         for doc in docs:
-            print(f"doc: {doc}")
+            logger.debug(f"doc: {doc}")
             if doc.state:
                 if doc.state.stream_state.stream_status == StreamStatus.COMPLETED:
                     comp_state_msgs.append(doc)

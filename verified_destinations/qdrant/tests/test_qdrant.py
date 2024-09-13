@@ -8,7 +8,7 @@ from dat_core.pydantic_models import (
     Type, DatCatalog, Status
 )
 from verified_destinations.qdrant.destination import Qdrant
-
+from dat_core.loggers import logger
 
 class TestQdrant:
 
@@ -33,7 +33,7 @@ class TestQdrant:
         """
         check = Qdrant().check(
             config=config)
-        print(check)
+        logger.debug(check)
         assert check.status == Status.SUCCEEDED
 
     def test_write(self, config, conf_catalog):
@@ -89,7 +89,7 @@ class TestQdrant:
             input_messages=mocked_input
         )
         for doc in docs:
-            print(f"doc: {doc}")
+            logger.debug(f"doc: {doc}")
             assert isinstance(doc, DatMessage)
 
     def test_write_multiple_streams(self, config, conf_catalog):
@@ -205,7 +205,7 @@ class TestQdrant:
             input_messages=mocked_input
         )
         for doc in docs:
-            print(f"doc: {doc}")
+            logger.debug(f"doc: {doc}")
             if doc.state.stream_state.stream_status == StreamStatus.COMPLETED:
                 comp_state_msgs.append(doc)
             assert isinstance(doc, DatMessage)

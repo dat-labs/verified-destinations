@@ -10,7 +10,7 @@ from dat_core.pydantic_models import (
 )
 from verified_destinations.weaviate.destination import Weaviate
 from verified_destinations.weaviate.specs import WeaviateSpecification
-
+from dat_core.loggers import logger
 
 class TestWeaviate:
 
@@ -93,14 +93,14 @@ class TestWeaviate:
             first_record,
             second_record,
         ]
-        print(f"mocked_input: {mocked_input}")
+        logger.debug(f"mocked_input: {mocked_input}")
         docs = Weaviate().write(
             config=config,
             configured_catalog=configured_catalog,
             input_messages=mocked_input
         )
         for doc in docs:
-            print(f"doc: {doc}")
+            logger.debug(f"doc: {doc}")
             assert isinstance(doc, DatMessage)
 
     def test_write_multiple_streams(self, config, conf_catalog):
@@ -192,7 +192,7 @@ class TestWeaviate:
             input_messages=mocked_input
         )
         for doc in docs:
-            print(f"doc: {doc}")
+            logger.debug(f"doc: {doc}")
             if doc.state:
                 if doc.state.stream_state.stream_status == StreamStatus.COMPLETED:
                     comp_state_msgs.append(doc)

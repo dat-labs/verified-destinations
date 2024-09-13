@@ -1,5 +1,5 @@
 from pymilvus import MilvusClient, connections, db
-
+from dat_core.loggers import logger
 
 # client = connections.connect(host="127.0.0.1", port=19530)
 
@@ -36,7 +36,7 @@ def load_data():
         data=data_with_uuid_id_and_nore_random_dynamic_fields
     )
 
-    print(res)
+    logger.debug(res)
 
 
 def check():
@@ -47,38 +47,38 @@ def check():
         collection_name=collection_name
     )
 
-    print(res)
+    logger.debug(res)
 
 def delete():
     client = _create_client()
     client.drop_collection(collection_name=collection_name)
 
-    print("Collection dropped")
+    logger.debug("Collection dropped")
 
 def _search_by_dynamic_fields_and_print_result():
     client = _create_client()
     # _filter = 'color in ["red_7025", "red_4794"] or random_field_1 == "random_value_1" and random_field_2 == "random_value_2"'
     _filter = 'meta == "Arbitrary" or meta == "Objective"'
-    print(f"Searching for {_filter}")
+    logger.debug(f"Searching for {_filter}")
     res = client.query(
         collection_name=collection_name,
         filter=_filter,
         partition_names=["pytest_pdf", "pytest_csv"]
     )
-    print(len(res))
+    logger.debug(len(res))
     # import pdb;pdb.set_trace()
     for r in res:
-        print(f"ID: {r.get('id')}, Meta: {r.get('meta')}")
+        logger.debug(f"ID: {r.get('id')}, Meta: {r.get('meta')}")
 
 def drop_partition():
     client = _create_client()
     client.drop_partition(collection_name="collection_name", partition_name="pytest_csv1")
 
-    print("Partition dropped")
+    logger.debug("Partition dropped")
 
 
 if __name__ == "__main__":
-    print(check())
+    logger.debug(check())
     # load_data()
     # delete()
     # _search_by_dynamic_fields_and_print_result()
