@@ -10,7 +10,7 @@ from dat_core.pydantic_models import (
 )
 from verified_destinations.weaviate.destination import Weaviate
 from verified_destinations.weaviate.specs import WeaviateSpecification
-
+from dat_core.loggers import logger
 
 class TestWeaviate:
 

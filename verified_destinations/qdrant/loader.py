@@ -3,13 +3,12 @@ from qdrant_client import QdrantClient, models
 from qdrant_client.http.models import Filter, FieldCondition, MatchValue, MatchAny, MatchExcept
 from typing import Any, List, Optional, Dict
 from dat_core.connectors.destinations.loader import Loader
-from qdrant_openapi_client.models import VectorParams, Distance
+from qdrant_client.models import VectorParams, Distance
 from dat_core.pydantic_models import (
     DatDocumentMessage, DatCatalog,
     WriteSyncMode, StreamMetadata
 )
 from dat_core.loggers import logger
-
 
 DISTANCE_MAP = {
     "dot": Distance.DOT,
@@ -42,7 +41,6 @@ class QdrantLoader(Loader):
         )
 
     def delete(self, filter, namespace=None):
-        logger.info(f"Deleting points with filter: {filter}")
         self._client.delete(
             collection_name=self.config.connection_specification.collection_name,
             points_selector=models.FilterSelector(

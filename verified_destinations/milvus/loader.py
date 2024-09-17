@@ -35,7 +35,6 @@ class MilvusLoader(Loader):
 
     def delete(self, filter, namespace=None):
         client = self._create_client()
-        logger.info(f"Deleting entities with filter: {filter}")
         res = client.delete(
             collection_name=self.config.connection_specification.collection_name,
             filter=filter,
@@ -49,7 +48,7 @@ class MilvusLoader(Loader):
             self._create_or_use_collection()
             collection_info = self.client.describe_collection(
                 self.config.connection_specification.collection_name)
-            print(f"Collection info: {collection_info}")
+            logger.debug(f"Collection info: {collection_info}")
             # Check if enable_dynamic_field is True
             if not collection_info.get("enable_dynamic_field", False):
                 return False, "Dynamic fields are not enabled."
@@ -134,7 +133,7 @@ class MilvusLoader(Loader):
     def _create_or_use_collection(self, ):
         collection_name = self.config.connection_specification.collection_name
         self.client = self._create_client()
-        print(f"client: {self.client}")
+        logger.debug(f"client: {self.client}")
 
         if not self.client.has_collection(collection_name=collection_name):
             self.client.create_collection(
