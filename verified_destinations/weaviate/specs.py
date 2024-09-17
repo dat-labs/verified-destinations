@@ -47,8 +47,8 @@ class APIKeyAuthentication(BaseModel):
             }
         }
     )
-    api_key: Optional[str] = Field(
-        None, description='API Key of the Weaviate cluster', title='API key'
+    api_key: str = Field(
+        ..., description='API Key of the Weaviate cluster', title='API key'
     )
 
 
@@ -56,21 +56,19 @@ class ConnectionSpecificationModel(ConnectionSpecification):
     cluster_url: str = Field(
         ..., description='URL of the Weaviate cluster', title='Weaviate cluster URL'
     )
-    authentication: Optional[
-        Union[
-            NoAuthentication,
-            BasicAuthentication,
-            APIKeyAuthentication
-        ]
-     ] = Field(...,
-        description='Authentication method to use',
-        title='Authentication',
-        json_schema_extra={
-            'ui-opts': {
-                'widget': 'singleDropdown',
-            }
-        }
-    )
+    authentication: Union[
+        NoAuthentication,
+        BasicAuthentication,
+        APIKeyAuthentication,
+    ] = Field(...,
+              description='Authentication method to use',
+              title='Authentication',
+              json_schema_extra={
+                  'ui-opts': {
+                          'widget': 'singleDropdown',
+                  }
+              }
+              )
 
 
 class WeaviateSpecification(BaseModel):

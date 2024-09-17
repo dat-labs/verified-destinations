@@ -37,6 +37,18 @@ class BasicAuthentication(BaseModel):
         ..., description='Password for the Milvus Database', title='Password'
     )
 
+class APITokenAuthentication(BaseModel):
+    authentication: str = Field(
+        'token_authentication',
+        json_schema_extra={
+            'ui-opts': {
+                'hidden': True,
+            }
+        }
+    )
+    token: str = Field(
+        ..., description='API Token for the Milvus Database', title='API Token'
+    )
 
 class MilvusConnection(ConnectionSpecification):
     uri: str = Field(...,
@@ -49,7 +61,8 @@ class MilvusConnection(ConnectionSpecification):
     )
     authentication: Union[
         NoAuthentication,
-        BasicAuthentication
+        BasicAuthentication,
+        APITokenAuthentication
     ] = Field(...,
               description='Authentication method to use',
               title='Authentication',

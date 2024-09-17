@@ -3,11 +3,12 @@ import uuid
 from dat_core.pydantic_models import DatCatalog, StreamMetadata
 import weaviate
 from weaviate.exceptions import UnexpectedStatusCodeException
-from typing import Any, List, Optional, Tuple
+from typing import Any, List, Optional, Tuple, Dict
 from dat_core.pydantic_models.dat_message import DatDocumentMessage
 from dat_core.connectors.destinations.loader import Loader
 from dat_core.connectors.destinations.utils import create_chunks
 from dat_core.pydantic_models import WriteSyncMode
+from dat_core.loggers import logger
 
 WEVIATE_BATCH_SIZE = 100
 
@@ -15,9 +16,8 @@ class WeaviateLoader(Loader):
     def __init__(self, config: Any):
         super().__init__(config)
 
-    def seed(self, document_chunks: List[DatDocumentMessage], namespace: str, stream: str) -> None:
+    def load(self, document_chunks: List[DatDocumentMessage], namespace: str, stream: str) -> None:
         chunks = create_chunks(document_chunks, batch_size=WEVIATE_BATCH_SIZE)
-        # self.client.batch.configure(batch_size=WEVIATE_BATCH_SIZE)
         with self.client.batch as batch:
             for data in chunks:
                 for document_chunk in data:
@@ -33,12 +33,7 @@ class WeaviateLoader(Loader):
 
     def delete(self, filter, namespace=None):
         self._create_client()
-        metadata_filters = self.metadata_filter(filter)
-        combined_filter = {
-            "operator": "And",
-            "operands": metadata_filters
-        }
-        object_ids = self._get_object_ids(combined_filter, namespace)
+        object_ids = self._get_object_ids(filter, namespace)
         if not object_ids:
             return
         where_filter = {"path": ["id"], "operator": "ContainsAny", "valueStringArray": object_ids}
@@ -53,18 +48,36 @@ class WeaviateLoader(Loader):
             self._create_client()
             return True, None
         except Exception as e:
+            logger.error(f"Error checking connection: {e}")
             return False, str(e)
 
-    def metadata_filter(self, metadata: StreamMetadata) -> Any:
-        filters = []
-        for field in self.METADATA_FILTER_FIELDS:
-            if field in metadata.model_dump().keys():
-                filters.append({
-                    "path": field,
-                    "operator": "Equal",
-                    "valueString": metadata.model_dump()[field]
+    def prepare_metadata_filter(self, filter: Dict[str, Any]) -> Dict[str, Any]:
+        filter_expr = {
+            "operator": "And",
+            "operands": []
+        }
+
+        for key, value in filter.items():
+            if key == self.METADATA_DAT_RUN_ID_FIELD:
+                filter_expr["operands"].append({
+                    "operator": "NotEqual",
+                    "path": f"{key}",
+                    "valueString": str(value)
                 })
-        return filters
+            elif isinstance(value, str):
+                filter_expr["operands"].append({
+                    "operator": "Equal",
+                    "path": f"{key}",
+                    "valueString": value
+                })
+            elif isinstance(value, list):
+                filter_expr["operands"].append({
+                    "operator": "ContainsAny",
+                    "path": f"{key}",
+                    "valueStringList": value
+                })
+
+        return filter_expr
 
     def _get_object_ids(self, combined_filter: dict, namespace: str) -> List[str]:
         class_name = self._namespace_to_class_name(namespace)
@@ -79,7 +92,8 @@ class WeaviateLoader(Loader):
             result = query.do()
             object_ids = [item["_additional"]["id"] for item in result["data"]["Get"][class_name]]
             return object_ids
-        except UnexpectedStatusCodeException as e:
+        except (UnexpectedStatusCodeException, KeyError) as e:
+            logger.error(f"Error while fetching object ids: {e}")
             return []
 
     def initiate_sync(self, configured_catalog: DatCatalog) -> None:
@@ -91,18 +105,18 @@ class WeaviateLoader(Loader):
                 )
 
     def _create_client(self, ):
-        if self.config.connection_specification.authentication.get("authentication") == "basic_authentication":
+        if self.config.connection_specification.authentication.authentication == "basic_authentication":
             auth = weaviate.AuthClientPassword(
-                username=self.config.connection_specification.authentication.get("username"),
-                password=self.config.connection_specification.authentication.get("password")
+                username=self.config.connection_specification.authentication.username,
+                password=self.config.connection_specification.authentication.password
             )
             self.client = weaviate.Client(
                 url=self.config.connection_specification.cluster_url,
                 auth_client_secret=auth
             )
-        elif self.config.connection_specification.authentication.get("authentication") == "api_key_authentication":
+        elif self.config.connection_specification.authentication.authentication == "api_key_authentication":
             auth = weaviate.AuthApiKey(
-                api_key=self.config.connection_specification.authentication.get("api_key")
+                api_key=self.config.connection_specification.authentication.api_key
             )
             self.client = weaviate.Client(
                 url=self.config.connection_specification.cluster_url,

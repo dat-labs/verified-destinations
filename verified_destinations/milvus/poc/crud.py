@@ -58,12 +58,12 @@ def delete():
 def _search_by_dynamic_fields_and_print_result():
     client = _create_client()
     # _filter = 'color in ["red_7025", "red_4794"] or random_field_1 == "random_value_1" and random_field_2 == "random_value_2"'
-    _filter = 'meta == "Arbitrary" or meta == "Objective"'
+    _filter = 'stream == "actor_instances"'
     print(f"Searching for {_filter}")
     res = client.query(
         collection_name=collection_name,
         filter=_filter,
-        partition_names=["pytest_pdf", "pytest_csv"]
+        # partition_names=["pytest_pdf", "pytest_csv"]
     )
     print(len(res))
     # import pdb;pdb.set_trace()
@@ -78,8 +78,8 @@ def drop_partition():
 
 
 if __name__ == "__main__":
-    print(check())
+    # print(check())
     # load_data()
     # delete()
-    # _search_by_dynamic_fields_and_print_result()
-    drop_partition()
+    _search_by_dynamic_fields_and_print_result()
+    # drop_partition()

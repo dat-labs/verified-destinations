@@ -1,10 +1,11 @@
 from pymilvus import MilvusClient
-from typing import Any, List, Optional, Tuple
+from typing import Any, List, Optional, Tuple, Dict
 from dat_core.pydantic_models import DatCatalog, StreamMetadata
 from dat_core.pydantic_models.dat_message import DatDocumentMessage
 from dat_core.connectors.destinations.loader import Loader
 from dat_core.connectors.destinations.utils import create_chunks
 from dat_core.pydantic_models import WriteSyncMode
+from dat_core.loggers import logger
 
 MILVUS_BATCH_SIZE = 100
 
@@ -34,17 +35,13 @@ class MilvusLoader(Loader):
 
     def delete(self, filter, namespace=None):
         client = self._create_client()
-        metadata_filter = self.metadata_filter(filter)
-        # ids = self._get_entity_ids(client, metadata_filter, namespace)
-        # if not ids:
-        #     return
-        print(f"Deleting entities with filter: {metadata_filter}")
+        logger.info(f"Deleting entities with filter: {filter}")
         res = client.delete(
             collection_name=self.config.connection_specification.collection_name,
-            filter=metadata_filter,
+            filter=filter,
             partition_names=[namespace]
         )
-        print(f"Deleted {res['delete_count']} entities")
+        logger.info(f"Deleted {res['delete_count']} entities")
 
 
     def check(self) -> Tuple[bool, Optional[str]]:
@@ -81,16 +78,23 @@ class MilvusLoader(Loader):
 
             return True, None
         except Exception as e:
-            print(e)
+            logger.error(f"Error while checking connection: {e}")
             return False, str(e)
 
-    def metadata_filter(self, metadata: StreamMetadata) -> Any:
-        filter_str = ''
-        for field in self.METADATA_FILTER_FIELDS:
-            if field in metadata.model_dump().keys():
-                filter_str += f'{field} == "{metadata.model_dump()[field]}" and '
-        # Remove the last ' and ' from the string
-        return filter_str[:-5]
+    def prepare_metadata_filter(self, filter: Dict[str, Any]) -> str:
+        filter_conditions = []
+
+        for key, value in filter.items():
+            if key == self.METADATA_DAT_RUN_ID_FIELD:
+                filter_conditions.append(f"({key} != {repr(value)})")
+            elif isinstance(value, str):
+                filter_conditions.append(f"({key} == {repr(value)})")
+            elif isinstance(value, list):
+                filter_conditions.append(f"({key} in {value})")
+
+        filter_statement = " and ".join(filter_conditions)
+
+        return filter_statement
 
     def _get_object_ids(self, client, filter: str, namespace: str) -> List[str]:
         response = client.query(
@@ -110,17 +114,22 @@ class MilvusLoader(Loader):
                 )
 
     def _create_client(self):
-        return MilvusClient(
-            uri=self.config.connection_specification.uri,
-            db_name=self.config.connection_specification.authentication.get(
-                'db_name', ""),
-            user=self.config.connection_specification.authentication.get(
-                'user', ""),
-            password=self.config.connection_specification.authentication.get(
-                'password', ""),
-            token=self.config.connection_specification.authentication.get(
-                'token', ""),
-        )
+        if self.config.connection_specification.authentication.authentication == "basic_authentication":
+            return MilvusClient(
+                uri=self.config.connection_specification.uri,
+                username=self.config.connection_specification.authentication.username,
+                password=self.config.connection_specification.authentication.password
+            )
+        elif self.config.connection_specification.authentication.authentication == "token_authentication":
+            return MilvusClient(
+                uri=self.config.connection_specification.uri,
+                token=self.config.connection_specification.authentication.token
+            )
+        else:
+            return MilvusClient(
+                uri=self.config.connection_specification.uri
+            )
+
 
     def _create_or_use_collection(self, ):
         collection_name = self.config.connection_specification.collection_name

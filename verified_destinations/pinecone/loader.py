@@ -1,6 +1,8 @@
+import time
 import uuid
 from pinecone import Pinecone
 from typing import Any, List, Optional, Dict
+from dat_core.loggers import logger
 from dat_core.connectors.destinations.loader import Loader
 from dat_core.connectors.destinations.utils import create_chunks
 from dat_core.pydantic_models import (
@@ -12,7 +14,7 @@ PINECONE_BATCH_SIZE = 100
 
 PARALLELISM_LIMIT = 4
 
-METADATA_SIZE = 40  # 40KB
+METADATA_SIZE_LIMIT = 40  # 40KB
 
 MAX_IDS_PER_DELETE = 1000
 
@@ -43,17 +45,27 @@ class PineconeLoader(Loader):
             ]
             [async_result.get() for async_result in async_results]
 
-    def delete(self, filter, namespace=None):
+    def determine_capacity_mode(self, index_name: str) -> str:
+        describe_index = self.pine.describe_index(index_name)
+        spec_keys = describe_index.get("spec", {})
+        if "pod" in spec_keys:
+            return "pod"
+        elif "serverless" in spec_keys:
+            return "serverless"
+        else:
+            raise ValueError("Unknown capacity mode")
+
+    def delete(self, filter: Dict[str, Any], namespace: str):
         pinecone_index = self.pine.Index(
             self.config.connection_specification.pinecone_index)
-        meta_filter = self.metadata_filter(filter)
-        spec = self.pine.describe_index(
-            self.config.connection_specification.pinecone_index).spec
-        if getattr(spec, "serverless", False):
+        capacity_mode = self.determine_capacity_mode(
+            self.config.connection_specification.pinecone_index)
+        logger.info(f"Deleting documents with filter: {filter}")
+        if capacity_mode in ["pod", "serverless"]:
             top_k = 10000
-            self.delete_by_metadata(meta_filter, top_k, namespace)
+            self.delete_by_metadata(filter, top_k, namespace)
         else:
-            pinecone_index.delete(filter=meta_filter, namespace=namespace)
+            pinecone_index.delete(filter=filter, namespace=namespace)
 
     def delete_by_metadata(self, filter, top_k, namespace=None):
         pinecone_index = self.pine.Index(
@@ -64,13 +76,12 @@ class PineconeLoader(Loader):
         while len(query_result.matches) > 0:
             vector_ids = [doc.id for doc in query_result.matches]
             if len(vector_ids) > 0:
-                # split into chunks of 1000 ids to avoid id limit
-                batches = create_chunks(
-                    vector_ids, batch_size=MAX_IDS_PER_DELETE)
+                batches = create_chunks(vector_ids, batch_size=MAX_IDS_PER_DELETE)
                 for batch in batches:
                     pinecone_index.delete(ids=list(batch), namespace=namespace)
-            query_result = pinecone_index.query(
-                vector=zero_vector, filter=filter, top_k=top_k, namespace=namespace)
+                    print(f"Sleeping for 20 seconds")
+                    time.sleep(20)
+            query_result = pinecone_index.query(vector=zero_vector, filter=filter, top_k=top_k, namespace=namespace)
 
     def check(self) -> Optional[str]:
         try:
@@ -93,21 +104,43 @@ class PineconeLoader(Loader):
                 self.delete(
                     filter={self.METADATA_DAT_STREAM_FIELD: stream.name}, namespace=stream.namespace)
 
-    def metadata_filter(self, metadata: Any) -> Dict[str, Any]:
-        meta_filter_fields = {}
-        if isinstance(metadata, StreamMetadata):
-            for field in self.METADATA_FILTER_FIELDS:
-                if field in metadata.model_dump().keys():
-                    meta_filter_fields[field] = {
-                        "$eq": getattr(metadata, field)}
-        else:
-            for metadata_key, metadata_value in metadata.items():
-                meta_filter_fields[metadata_key] = {"$eq": metadata_value}
+    def prepare_metadata_filter(self, filter: Dict[str, Any]) -> Dict[str, Any]:
+        filter_dict = {}
 
-        return meta_filter_fields
+        for key, value in filter.items():
+            if key == self.METADATA_DAT_RUN_ID_FIELD:
+                filter_dict[key] = {"$ne": value}
+            elif isinstance(value, str):
+                filter_dict[key] = {"$eq": value}
+            elif isinstance(value, list):
+                filter_dict[key] = {"$in": value}
+
+        return filter_dict
 
     def _normalize_metadata(self, metadata: dict) -> dict:
-        for key, value in metadata.items():
-            if value is None:
-                metadata[key] = ""  # Set value to empty string if None
-        return metadata
+        # Remove any key-value pairs with None values
+        normalized_metadata = {
+            key: value for key, value in metadata.items() if value is not None
+        }
+
+        # Filter out unsupported metadata types and normalize lists of strings
+        for key, value in list(normalized_metadata.items()):
+            if isinstance(value, (str, int, float, bool)):
+                # Supported types: keep them as-is
+                continue
+            elif isinstance(value, list):
+                # Ensure the list contains only strings
+                if all(isinstance(item, str) for item in value):
+                    normalized_metadata[key] = value
+                else:
+                    # Remove list if it contains non-string elements
+                    del normalized_metadata[key]
+            else:
+                # Remove unsupported metadata types
+                del normalized_metadata[key]
+
+        metadata_size = sum(len(str(k)) + len(str(v)) for k, v in normalized_metadata.items())
+        if metadata_size > METADATA_SIZE_LIMIT * 1024:
+            raise ValueError(f"Metadata exceeds the 40KB size limit, current size: {metadata_size} bytes")
+
+        return normalized_metadata
