@@ -107,10 +107,11 @@ class MilvusLoader(Loader):
         self._create_or_use_collection()
         for stream in configured_catalog.document_streams:
             if stream.write_sync_mode == WriteSyncMode.REPLACE:
-                self.client.drop_partition(
-                    collection_name=self.config.connection_specification.collection_name,
-                    partition_name=stream.namespace
-                )
+                _filter = self.prepare_metadata_filter(
+                    {self.METADATA_DAT_STREAM_FIELD: stream.name})
+                logger.info(f"Upsert mode set to 'REPLACE' for stream {stream.name}. "
+                            f"Deleting with filter: {_filter}")
+                self.delete(filter=_filter, namespace=stream.namespace)
 
     def _create_client(self):
         if self.config.connection_specification.authentication.authentication == "basic_authentication":

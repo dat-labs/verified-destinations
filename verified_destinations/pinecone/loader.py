@@ -60,7 +60,6 @@ class PineconeLoader(Loader):
             self.config.connection_specification.pinecone_index)
         capacity_mode = self.determine_capacity_mode(
             self.config.connection_specification.pinecone_index)
-        logger.info(f"Deleting documents with filter: {filter}")
         if capacity_mode in ["pod", "serverless"]:
             top_k = 10000
             self.delete_by_metadata(filter, top_k, namespace)
@@ -101,8 +100,12 @@ class PineconeLoader(Loader):
     def initiate_sync(self, configured_catalog: DatCatalog):
         for stream in configured_catalog.document_streams:
             if stream.write_sync_mode == WriteSyncMode.REPLACE:
+                _filter = self.prepare_metadata_filter(
+                    {self.METADATA_DAT_STREAM_FIELD: stream.name})
+                logger.info(f"Upsert mode set to 'REPLACE' for stream {stream.name}."
+                            f" Deleting with filter: {_filter}")
                 self.delete(
-                    filter={self.METADATA_DAT_STREAM_FIELD: stream.name}, namespace=stream.namespace)
+                    filter=_filter, namespace=stream.namespace)
 
     def prepare_metadata_filter(self, filter: Dict[str, Any]) -> Dict[str, Any]:
         filter_dict = {}

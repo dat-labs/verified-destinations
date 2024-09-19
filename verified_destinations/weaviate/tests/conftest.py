@@ -31,7 +31,7 @@ def conf_catalog(request):
                 name="PDF",
                 namespace="pytest_unstructured_document",
                 read_sync_mode=ReadSyncMode.INCREMENTAL,
-                write_sync_mode=WriteSyncMode.UPSERT,
+                write_sync_mode=WriteSyncMode.REPLACE,
             ),
         ]
     )
@@ -106,7 +106,7 @@ def records(request):
                     "dat_stream": "PDF",
                     "dat_document_entity": "/Apple/Orange.pdf",
                     "dat_record_id": "/Apple/Orange.pdf",
-                    "dat_run_id": "7c3f04fafccc4d6090e5c2ec94bd6c827"
+                    "dat_run_id": "7c3f04fafccc4d6090e5c2ec94bd6c830"
                 }
             },
             {
@@ -119,7 +119,7 @@ def records(request):
                     "dat_stream": "PDF",
                     "dat_document_entity": "/Apple/Orange.pdf",
                     "dat_record_id": "/Apple/Orange.pdf",
-                    "dat_run_id": "7c3f04fafccc4d6090e5c2ec94bd6c827"
+                    "dat_run_id": "7c3f04fafccc4d6090e5c2ec94bd6c830"
                 }
             },
             {
@@ -132,7 +132,20 @@ def records(request):
                     "dat_stream": "PDF",
                     "dat_document_entity": "/Apple/Orange.pdf",
                     "dat_record_id": "/Apple/Orange.pdf",
-                    "dat_run_id": "7c3f04fafccc4d6090e5c2ec94bd6c827"
+                    "dat_run_id": "7c3f04fafccc4d6090e5c2ec94bd6c830"
+                }
+            },
+            {
+                "type": Type.RECORD,
+                "document_chunk": "An Banana PDF first chunk",
+                "vectors": [0.3] * 1536,
+                "metadata": {
+                    "dat_source": "GoogleDrive",
+                    "dat_document_chunk": "An Banana PDF first chunk",
+                    "dat_stream": "PDF",
+                    "dat_document_entity": "/Apple/Banana.pdf",
+                    "dat_record_id": "/Apple/Banana.pdf",
+                    "dat_run_id": "7c3f04fafccc4d6090e5c2ec94bd6c830"
                 }
             }
         ],

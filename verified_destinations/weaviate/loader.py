@@ -12,6 +12,7 @@ from dat_core.loggers import logger
 
 WEVIATE_BATCH_SIZE = 100
 
+
 class WeaviateLoader(Loader):
     def __init__(self, config: Any):
         super().__init__(config)
@@ -25,7 +26,7 @@ class WeaviateLoader(Loader):
                     metadata = self._normalize_metadata(metadata)
                     vectors = document_chunk.data.vectors
                     class_name = self._namespace_to_class_name(namespace)
-                    object_id= str(uuid.uuid4())
+                    object_id = str(uuid.uuid4())
                     batch.add_data_object(
                         data_object=metadata, class_name=class_name,
                         uuid=object_id, vector=vectors
@@ -36,7 +37,8 @@ class WeaviateLoader(Loader):
         object_ids = self._get_object_ids(filter, namespace)
         if not object_ids:
             return
-        where_filter = {"path": ["id"], "operator": "ContainsAny", "valueStringArray": object_ids}
+        where_filter = {
+            "path": ["id"], "operator": "ContainsAny", "valueStringArray": object_ids}
         self.client.batch.delete_objects(
             class_name=self._namespace_to_class_name(namespace),
             where=where_filter
@@ -90,7 +92,8 @@ class WeaviateLoader(Loader):
         )
         try:
             result = query.do()
-            object_ids = [item["_additional"]["id"] for item in result["data"]["Get"][class_name]]
+            object_ids = [item["_additional"]["id"]
+                          for item in result["data"]["Get"][class_name]]
             return object_ids
         except (UnexpectedStatusCodeException, KeyError) as e:
             logger.error(f"Error while fetching object ids: {e}")
@@ -100,9 +103,12 @@ class WeaviateLoader(Loader):
         self._create_client()
         for stream in configured_catalog.document_streams:
             if stream.write_sync_mode == WriteSyncMode.REPLACE:
-                self.client.schema.delete_class(
-                    self._namespace_to_class_name(stream.namespace)
+                _filter = self.prepare_metadata_filter(
+                    {self.METADATA_DAT_STREAM_FIELD: stream.name}
                 )
+                logger.info(f"Upsert mode set to 'REPLACE' for stream {stream.name}. "
+                            f"Deleting with filter: {_filter}")
+                self.delete(filter=_filter, namespace=stream.namespace)
 
     def _create_client(self, ):
         if self.config.connection_specification.authentication.authentication == "basic_authentication":
@@ -153,6 +159,7 @@ class WeaviateLoader(Loader):
         class_name = '_'.join(capitalized_words)
 
         return class_name
+
 
 """
 TODO: Complete create_client to support all type of authentications

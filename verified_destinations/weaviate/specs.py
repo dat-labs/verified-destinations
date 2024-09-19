@@ -20,6 +20,9 @@ class NoAuthentication(BaseModel):
         }
     )
 
+    class Config:
+        extra = "allow"
+
 
 class BasicAuthentication(BaseModel):
     authentication: str = Field(

@@ -82,8 +82,12 @@ class QdrantLoader(Loader):
     def initiate_sync(self, configured_catalog: DatCatalog):
         for stream in configured_catalog.document_streams:
             if stream.write_sync_mode == WriteSyncMode.REPLACE:
+                _filter = self.prepare_metadata_filter(
+                    {self.METADATA_DAT_STREAM_FIELD: stream.name})
+                logger.info(f"Upsert mode set to 'REPLACE' for stream {stream.name}."
+                            f" Deleting with filter: {_filter}")
                 self.delete(
-                    filter={self.METADATA_DAT_STREAM_FIELD: stream.name}, namespace=stream.namespace)
+                    filter=_filter, namespace=stream.namespace)
 
     def prepare_metadata_filter(self, filter: Dict[str, Any]) -> Filter:
         conditions = []

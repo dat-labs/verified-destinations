@@ -26,13 +26,13 @@ def conf_catalog(request):
                 name="actor_instances",
                 namespace="pytest_actor_instances",
                 read_sync_mode=ReadSyncMode.INCREMENTAL,
-                write_sync_mode=WriteSyncMode.UPSERT,
+                write_sync_mode=WriteSyncMode.REPLACE,
             ),
             DatDocumentStream(
                 name="PDF",
                 namespace="pytest_unstructured_document",
                 read_sync_mode=ReadSyncMode.INCREMENTAL,
-                write_sync_mode=WriteSyncMode.UPSERT,
+                write_sync_mode=WriteSyncMode.REPLACE,
             ),
         ]
     )
