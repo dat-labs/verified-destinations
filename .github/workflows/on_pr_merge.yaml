@@ -1,0 +1,38 @@
+name: Run tests on PR merge
+
+on:
+  pull_request:
+    types: [review_requested]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  run-tests:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        python-version:
+          - "3.10"
+    
+    name: Test
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up python
+        uses: actions/setup-python@v4
+        with:
+          python-versions: ${{ matrix.python-version }}
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip poetry
+          poetry lock && poetry install
+          poetry add pytest
+      
+      - name: Run tests
+        run: poetry run pytest
